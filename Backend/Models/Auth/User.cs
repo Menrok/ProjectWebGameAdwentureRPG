@@ -1,3 +1,4 @@
+using Backend.Models.Game;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models.Auth;
@@ -12,4 +13,7 @@ public class User
 
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
+
+    public Player? Player { get; set; }
+
 }

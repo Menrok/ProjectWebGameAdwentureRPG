@@ -16,9 +16,17 @@ public class Player
     [Required]
     public string Name { get; set; } = null!;
 
-    public int Level { get; set; } = 1;
-    public int Experience { get; set; } = 0;
-
     public int Health { get; set; } = 100;
     public int MaxHealth { get; set; } = 100;
+
+    public int BaseAttack { get; set; } = 5;
+    public int BaseDefense { get; set; } = 0;
+
+    public int? EquippedWeaponId { get; set; }
+    public Item? EquippedWeapon { get; set; }
+
+    public int? EquippedClothingId { get; set; }
+    public Item? EquippedClothing { get; set; }
+
+    public ICollection<InventoryItem> Inventory { get; set; } = new List<InventoryItem>();
 }
