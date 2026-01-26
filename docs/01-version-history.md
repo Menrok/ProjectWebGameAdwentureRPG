@@ -18,3 +18,23 @@
 - Dodano serwis zarządzania ekwipunkiem (InventoryService).
 - Dodano kontroler API do obsługi ekwipunku i stanu gracza.
 - Udostępniono endpoint prezentujący aktualny stan gracza (HP, statystyki, ekwipunek).
+
+## v0.0.3
+- Zaimplementowano system fabularny oparty o węzły historii (StoryNode).
+- Dodano prolog gry wraz z dialogami i wyborami gracza.
+- Wprowadzono efekty fabularne wpływające na stan gracza (nagrody, zmiana rozdziału).
+- Zintegrowano fabułę z systemem ekwipunku (nagroda: bandaż).
+- Dodano stabilne identyfikatory gameplayowe przedmiotów (Item.Code).
+- Zaktualizowano mechanizm seedowania przedmiotów o kody przedmiotów.
+- Zrefaktoryzowano system ekwipunku (IsEquipped, przygotowanie pod stackowanie).
+- Wprowadzono system lokacji świata gry (plaża, las, wioska).
+- Dodano połączenia pomiędzy lokacjami oraz możliwość powrotu.
+- Zaimplementowano tryb swobodnej eksploracji świata (free mode).
+- Utworzono centralne definicje świata gry (LocationsData).
+- Zaimplementowano system akcji zależnych od lokacji.
+- Dodano akcje dostępne na plaży (przeszukiwanie, odpoczynek).
+- Wprowadzono flagi świata gry (jednorazowe interakcje).
+- Zaimplementowano serwisy: StoryService, LocationService, LocationActionService.
+- Zintegrowano system fabularny, lokacje i akcje w jeden spójny flow gry.
+- Dodano centralny GameController zwracający pełny stan gry.
+- Backend decyduje o aktualnym trybie gry (Story / World).

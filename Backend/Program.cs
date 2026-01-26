@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Backend.Services.Game;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +17,9 @@ builder.Services.AddDbContext<GameDbContext>(options => options.UseSqlite(builde
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<StoryService>();
+builder.Services.AddScoped<LocationService>();
+builder.Services.AddScoped<LocationActionService>();
 
 builder.Services.AddAuthentication(options =>
 {

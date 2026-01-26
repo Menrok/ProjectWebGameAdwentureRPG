@@ -14,4 +14,8 @@ public class InventoryItem
     public int ItemId { get; set; }
 
     public Item Item { get; set; } = null!;
+
+    public bool IsEquipped { get; set; } = false;
+
+    public int Quantity { get; set; } = 1;
 }

@@ -5,6 +5,10 @@ namespace Backend.Models.Game;
 public class Item
 {
     public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
+    public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
 
     public ItemType ItemType { get; set; }

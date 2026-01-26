@@ -14,13 +14,15 @@ public static class GameDbSeeder
         {
             new Item
             {
-                Name = "Stary Miecz",
+                Code = "knife_basic",
+                Name = "Nóż",
                 ItemType = ItemType.Equipment,
                 Slot = EquipmentSlot.Weapon,
-                AttackBonus = 5
+                AttackBonus = 3
             },
             new Item
             {
+                Code = "clothing_basic",
                 Name = "Proste Ubranie",
                 ItemType = ItemType.Equipment,
                 Slot = EquipmentSlot.Clothing,
@@ -28,7 +30,8 @@ public static class GameDbSeeder
             },
             new Item
             {
-                Name = "Mała Mikstura Zdrowia",
+                Code = "bandage_basic",
+                Name = "Bandaż",
                 ItemType = ItemType.Consumable,
                 HealAmount = 20
             }

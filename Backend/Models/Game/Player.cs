@@ -16,7 +16,7 @@ public class Player
     [Required]
     public string Name { get; set; } = null!;
 
-    public int Health { get; set; } = 100;
+    public int Health { get; set; } = 10;
     public int MaxHealth { get; set; } = 100;
 
     public int BaseAttack { get; set; } = 5;
@@ -29,4 +29,10 @@ public class Player
     public Item? EquippedClothing { get; set; }
 
     public ICollection<InventoryItem> Inventory { get; set; } = new List<InventoryItem>();
+    
+    public StoryChapter CurrentChapter { get; set; } = StoryChapter.Prologue;
+    public string CurrentStoryNode { get; set; } = "prologue_wake";
+    public string CurrentLocationId { get; set; } = "beach";
+    public HashSet<string> Flags { get; set; } = new();
+
 }
