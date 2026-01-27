@@ -38,3 +38,11 @@
 - Zintegrowano system fabularny, lokacje i akcje w jeden spójny flow gry.
 - Dodano centralny GameController zwracający pełny stan gry.
 - Backend decyduje o aktualnym trybie gry (Story / World).
+
+## v0.0.4
+- Połączono logowanie i rejestrację w jeden widok autoryzacji (AuthView).
+- Dodano animowane przełączanie trybu logowanie/rejestracja.
+- Dodano pole „Powtórz hasło” wraz z walidacją frontend i backend.
+- Ujednolicono komunikaty błędów i sukcesu w formularzu.
+- Dodano bezpieczne uwierzytelnianie rejestracji po stronie backendu (ConfirmPassword).
+- Uporządkowano repozytorium: dodano `.gitignore` dla SQLite i migracji EF Core.

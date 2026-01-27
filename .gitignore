@@ -441,3 +441,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Entity Framework migrations
+Backend/Migrations/

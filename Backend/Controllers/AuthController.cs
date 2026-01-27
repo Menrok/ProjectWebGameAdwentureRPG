@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest("Niepoprawne dane rejestracji");
 
         var success = await _auth.Register(request.Username, request.Password);
         if (!success)
