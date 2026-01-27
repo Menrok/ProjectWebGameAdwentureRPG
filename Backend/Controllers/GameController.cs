@@ -79,7 +79,7 @@ public class GameController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        return Ok();
+        return Ok(new { success = true });    
     }
 
     [HttpPost("location/action/{actionId}")]

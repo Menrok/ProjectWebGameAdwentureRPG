@@ -70,7 +70,7 @@ public class InventoryController : ControllerBase
     {
         var playerId = GetPlayerId();
         await _inventoryService.UseConsumable(playerId, inventoryItemId);
-        return Ok();
+        return Ok(new { success = true });
     }
 
     [HttpGet("status")]

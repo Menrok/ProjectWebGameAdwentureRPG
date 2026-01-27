@@ -31,8 +31,7 @@ public class Player
     public ICollection<InventoryItem> Inventory { get; set; } = new List<InventoryItem>();
     
     public StoryChapter CurrentChapter { get; set; } = StoryChapter.Prologue;
-    public string CurrentStoryNode { get; set; } = "prologue_wake";
+    public string? CurrentStoryNode { get; set; } = "prologue_intro";
     public string CurrentLocationId { get; set; } = "beach";
-    public HashSet<string> Flags { get; set; } = new();
-
+    public List<string> Flags { get; set; } = new();
 }

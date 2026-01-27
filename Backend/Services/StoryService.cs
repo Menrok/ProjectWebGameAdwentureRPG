@@ -39,23 +39,21 @@ public class StoryService
 
     public async Task<StoryNode> Choose(int playerId, string nextNodeId)
     {
-        var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.Id == playerId);
+        var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == playerId);
 
         if (player == null)
             throw new Exception("Player not found");
 
-        var nextNode = PrologueStory.Nodes
-            .FirstOrDefault(n => n.Id == nextNodeId);
+        var nextNode = PrologueStory.Nodes.FirstOrDefault(n => n.Id == nextNodeId);
 
         if (nextNode == null)
             throw new Exception("Story node not found");
 
+        player.CurrentStoryNode = nextNodeId;
         await HandleStoryEffects(player, nextNodeId);
 
-        player.CurrentStoryNode = nextNodeId;
         await _context.SaveChangesAsync();
-
+        
         return nextNode;
     }
 
@@ -77,7 +75,8 @@ public class StoryService
 
         if (nodeId == "prologue_free_mode")
         {
-            player.CurrentChapter = StoryChapter.Chapter1;
+            player.CurrentChapter = StoryChapter.Prologue;
+            player.CurrentStoryNode = null;
             player.CurrentLocationId = "beach";
         }
     }

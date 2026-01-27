@@ -1,5 +1,4 @@
 using Backend.Models.Game;
-using Backend.DTOs.Game;
 
 namespace Backend.Story;
 
@@ -13,7 +12,7 @@ public static class PrologueStory
             Text =
                 "Sztorm jest silniejszy, niż ktokolwiek przewidywał.\n\n" +
                 "Niebo rozdzierają błyskawice. Fale uderzają z pełną siłą, jedna po drugiej.\n" +
-                "Metalowy statek przechyla się gwałtownie. Ludzie tracą równowagę.\n\n" +
+                "Statek przechyla się gwałtownie. Ludzie tracą równowagę.\n\n" +
                 "Ktoś krzyczy. Wiatr natychmiast zagłusza ten dźwięk.\n\n" +
                 "Woda zalewa pokład. Światła gasną.\n\n" +
                 "A potem —\n" +
@@ -72,10 +71,10 @@ public static class PrologueStory
         {
             Id = "prologue_give_bandage",
             Text =
-                "Mężczyzna szybko sięga do plecaka i wyciąga prowizoryczny bandaż.\n\n" +
-                "— Nie jest sterylny, ale zatrzyma krwawienie.\n\n" +
-                "Pomaga ci owinąć rozcięte ramię.\n\n" +
-                "— Już. Teraz oddychaj spokojnie.",
+                "Mężczyzna szybko sięga do plecaka i wyciąga bandaż.\n\n" +
+                "— Powinien zatrzymać krwawienie.\n\n" +
+                "Podaje ci bandaż.\n\n" +
+                "— Przyda się później.",
             Choices = new()
             {
                 new StoryChoice
@@ -97,8 +96,7 @@ public static class PrologueStory
                 {
                     Id = "ask_who",
                     Text = "Kim jesteś?",
-                    ResponseText =
-                        "— Jestem Leon. Mieszkam w niewielkiej wiosce po drugiej stronie lasu.",
+                    NextNodeId = "prologue_ask_name"
                 },
                 new StoryChoice
                 {
@@ -117,14 +115,67 @@ public static class PrologueStory
 
         new StoryNode
         {
-            Id = "prologue_free_mode",
-            IsFreeMode = true,
+            Id = "prologue_ask_name",
+            IsDialog = true,
+            Text =
+                "— Jestem Leon. Mieszkam w niewielkiej wiosce po drugiej stronie lasu.\n\n" +
+                "— A ty?",
+            Choices = new()
+            {
+                new StoryChoice
+                {
+                    Text = "Przedstaw się",
+                    NextNodeId = "prologue_after_name"
+                }
+            }
+        },
+
+        new StoryNode
+        {
+            Id = "prologue_after_name",
+            IsDialog = true,
+            Text = 
+                "— Lia.\n\n" +
+                "Leon kiwa głową, jakby zapamiętał to imię.",
+            Choices = new()
+            {
+                new StoryChoice
+                {
+                    Id = "ask_where_after_name",
+                    Text = "Gdzie jestem?",
+                    ResponseText =
+                        "— Na wyspie. Nie ma jej na mapach. Statki tu nie przypływają.",
+                },
+                new StoryChoice
+                {
+                    Text = "Zakończ rozmowę",
+                    NextNodeId = "prologue_end_scene"
+                }
+            }
+        },
+
+        new StoryNode
+        {
+            Id = "prologue_end_scene",
             Text =
                 "Leon odchodzi w stronę lasu.\n\n" +
                 "Zostajesz sama na plaży.\n\n" +
                 "Morze jest spokojne.\n" +
-                "Za plecami rozciąga się gęsty las.\n\n" +
-                "Możesz ruszyć w głąb wyspy albo chwilę odpocząć."
-        }
+                "Za plecami rozciąga się gęsty las.",
+            Choices = new()
+            {
+                new StoryChoice
+                {
+                    Text = "Rozejrzyj się",
+                    NextNodeId = "prologue_free_mode"
+                }
+            }
+        },
+
+        new StoryNode
+        {
+            Id = "prologue_free_mode",
+            IsFreeMode = true,
+        },
     };
 }
