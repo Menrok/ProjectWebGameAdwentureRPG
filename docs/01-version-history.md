@@ -54,3 +54,16 @@
 - Dodano centralny model wyniku akcji (ActionResult) zawierający komunikaty, nagrody i zmiany stanu.
 - Uporządkowano serwisy gameplayowe i ich odpowiedzialności.
 - Przygotowano stabilne kontrakty API pod dalszy rozwój frontendu.
+
+## v0.0.6
+- Dodano podstawowy interfejs użytkownika gry po stronie frontendu.
+- Zaimplementowano główny widok gry (GameView) integrujący stan gry.
+- Dodano widoki fabularne i świata gry (StoryView, WorldView).
+- Zaimplementowano widok akcji gracza (ActionView).
+- Dodano modalne okna:
+  - ekwipunku gracza,
+  - dziennika wydarzeń,
+  - profilu gracza.
+- Dodano górny i dolny pasek nawigacji (TopBar, BottomBar).
+- Wprowadzono system ikon UI dla przedmiotów i elementów interfejsu.
+- Frontend umożliwia pełną interakcję z backendowym gameplay loopem.
