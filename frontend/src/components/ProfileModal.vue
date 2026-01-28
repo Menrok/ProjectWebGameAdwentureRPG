@@ -1,51 +1,67 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { Backend } from "@/backend"
+import TooltipItem from "@/components/TooltipItem.vue"
+import type { PlayerStatusDto } from "@/types/player"
 
-defineEmits<{
-  (e: "close"): void
-}>()
-
-type PlayerStatusDto = {
-  playerId: number
-  name: string
-
-  health: number
-  maxHealth: number
-
-  attack: number
-  defense: number
-  weapon?: string | null
-  clothing?: string | null
-
-  inventoryCount: number
-}
+defineEmits<{ (e: "close"): void }>()
 
 const loading = ref(true)
 const player = ref<PlayerStatusDto | null>(null)
+const activeSlot = ref<"weapon" | "clothing" | null>(null)
 
-const healthPercent = computed(() => {
-  if (!player.value) return 0
-  return Math.max(
-    0,
-    Math.min(
-      100,
-      (player.value.health / player.value.maxHealth) * 100
-    )
-  )
-})
+const healthPercent = computed(() =>
+  player.value ? Math.min(100, (player.value.health / player.value.maxHealth) * 100) : 0
+)
 
 async function loadPlayer() {
   loading.value = true
   try {
     player.value = await Backend.getPlayerStatus()
-  } catch (e) {
-    console.error("Błąd pobierania profilu gracza", e)
-    player.value = null
   } finally {
     loading.value = false
   }
 }
+
+function toggleSlot(slot: "weapon" | "clothing") {
+  activeSlot.value = activeSlot.value === slot ? null : slot
+}
+
+async function unequip(slot: "weapon" | "clothing") {
+  if (!player.value) return
+
+  if (slot === "weapon") {
+    await Backend.unequipWeapon()
+    player.value.weapon = null
+  } else {
+    await Backend.unequipClothing()
+    player.value.clothing = null
+  }
+
+  activeSlot.value = null
+
+  Backend.getPlayerStatus().then(p => {
+    player.value = p
+  })
+}
+
+const weaponItem = computed(() =>
+  player.value?.weapon ? {
+        id: -1,
+        name: "Broń",
+        description: "Aktualnie założona broń",
+        itemType: "Weapon" as const
+      } : null
+)
+
+const clothingItem = computed(() =>
+  player.value?.clothing ? {
+        id: -2,
+        name: "Ubranie",
+        description: "Aktualnie założone ubranie",
+        itemType: "Clothing" as const
+      } : null
+)
 
 onMounted(loadPlayer)
 </script>
@@ -88,14 +104,18 @@ onMounted(loadPlayer)
 
         <div class="right">
           <div class="equipment-grid">
-            <div class="slot" :class="{ empty: !player.weapon }">
-              <img v-if="player.weapon" :src="player.weapon" class="icon" alt="Broń"/>
+            <div class="slot" :class="{ empty: !player.weapon }" @click="player.weapon && toggleSlot('weapon')">
+              <img v-if="player.weapon" :src="player.weapon" class="icon"/>
               <span v-else class="slot-label">Broń</span>
+
+              <TooltipItem v-if="activeSlot === 'weapon' && weaponItem" :item="weaponItem" :isEquipped="true" @unequip="unequip('weapon')"/>
             </div>
 
-            <div class="slot" :class="{ empty: !player.clothing }">
-              <img v-if="player.clothing" :src="player.clothing" class="icon" alt="Ubranie"/>
+            <div class="slot" :class="{ empty: !player.clothing }" @click="player.clothing && toggleSlot('clothing')">
+              <img v-if="player.clothing" :src="player.clothing" class="icon"/>
               <span v-else class="slot-label">Ubranie</span>
+
+              <TooltipItem v-if="activeSlot === 'clothing' && clothingItem" :item="clothingItem" :isEquipped="true" @unequip="unequip('clothing')"/>
             </div>
 
             <div class="slot empty">

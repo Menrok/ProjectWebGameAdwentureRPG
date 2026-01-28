@@ -75,3 +75,9 @@
 - Ujednolicono backendowy model ekwipunku.
 - Poprawiono synchronizację frontend–backend.
 - Uporządkowano modele i DTO.
+
+## v0.0.8
+- Uporządkowano frontendowy system ekwipunku i profilu gracza.
+- Wydzielono wspólne typy (Item, PlayerStatus) do osobnego katalogu.
+- Zaimplementowano jeden wspólny komponent tooltipa dla przedmiotów.
+- Dodano obsługę akcji: użycie, zakładanie i zdejmowanie ekwipunku.

@@ -1,68 +1,44 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue"
 import { Backend } from "@/backend"
+import TooltipItem from "@/components/TooltipItem.vue"
+import type { InventoryItemDto, InventorySlot } from "@/types/items"
 
 defineEmits<{
   (e: "close"): void
 }>()
 
-type InventoryItem = {
-  id: number
-  slotIndex: number
-  item: {
-    id: number
-    name: string
-    description: string
-    icon: string
-    itemType: "Consumable" | "Weapon" | "Clothing" | "QuestItem"
-    healAmount?: number
-    attackBonus?: number
-    defenseBonus?: number
-  }
-}
-
-type InventorySlot = {
-  index: number
-  item: InventoryItem | null
-}
-
 const MAX_SLOTS = 10
 
 const loading = ref(true)
-const items = ref<InventoryItem[]>([])
-const selectedItem = ref<InventoryItem | null>(null)
+const items = ref<InventoryItemDto[]>([])
+const selectedItemId = ref<number | null>(null)
+const initialLoading = ref(true)
 
-async function loadInventory() {
-  loading.value = true
+async function loadInventory(showLoader = false) {
+  if (showLoader) loading.value = true
+
   try {
     const raw = await Backend.getInventory()
-
-    items.value = raw
-      .filter((i: any) => !i.isEquipped)
-      .map((i: any): InventoryItem => ({
-        id: i.id,
-        slotIndex: i.slotIndex,
-        item: {
-          id: i.item.id,
-          name: i.item.name,
-          description: i.item.description,
-          icon: i.item.icon,
-          itemType: i.item.itemType,
-          healAmount: i.item.healAmount,
-          attackBonus: i.item.attackBonus,
-          defenseBonus: i.item.defenseBonus
-        }
-      }))
-
+      items.value = raw
+        .filter((i: any) => !i.isEquipped)
+        .map((i: any): InventoryItemDto => ({
+          id: i.id,
+          slotIndex: i.slotIndex,
+          item: {
+            id: i.item.id,
+            name: i.item.name,
+            description: i.item.description,
+            icon: i.item.icon,
+            itemType: i.item.itemType,
+            healAmount: i.item.healAmount,
+            attackBonus: i.item.attackBonus,
+            defenseBonus: i.item.defenseBonus
+          }
+        }))
   } finally {
     loading.value = false
-  }
-
-  if (
-    selectedItem.value &&
-    !items.value.find(i => i.id === selectedItem.value!.id)
-  ) {
-    selectedItem.value = null
+    initialLoading.value = false
   }
 }
 
@@ -80,25 +56,34 @@ const slots = computed<InventorySlot[]>(() => {
 })
 
 function selectSlot(slot: InventorySlot) {
-  selectedItem.value = slot.item
+  if (!slot.item) return
+
+  if (selectedItemId.value === slot.item.id) {
+    selectedItemId.value = null
+  } else {
+    selectedItemId.value = slot.item.id
+  }
 }
 
-async function useItem(inventoryItemId: number) {
-  await Backend.useItem(inventoryItemId)
-  await loadInventory()
+async function useItem(id: number) {
+  await Backend.useItem(id)
+  items.value = items.value.filter(i => i.id !== id)
+  selectedItemId.value = null
 }
 
-async function equipWeaponItem(inventoryItemId: number) {
-  await Backend.equipWeapon(inventoryItemId)
-  await loadInventory()
+async function equipWeaponItem(id: number) {
+  await Backend.equipWeapon(id)
+  items.value = items.value.filter(i => i.id !== id)
+  selectedItemId.value = null
 }
 
-async function equipClothingItem(inventoryItemId: number) {
-  await Backend.equipClothing(inventoryItemId)
-  await loadInventory()
+async function equipClothingItem(id: number) {
+  await Backend.equipClothing(id)
+  items.value = items.value.filter(i => i.id !== id)
+  selectedItemId.value = null
 }
 
-onMounted(loadInventory)
+onMounted(() => loadInventory(true))
 </script>
 
 <template>
@@ -113,48 +98,14 @@ onMounted(loadInventory)
       <div v-else class="grid">
         <div v-for="slot in slots" :key="slot.index" class="slot" :class="{
             empty: !slot.item,
-            selected: slot.item && selectedItem?.id === slot.item.id
+            selected: slot.item && selectedItemId === slot.item.id
           }" @click="selectSlot(slot)">
           <Transition name="slot">
             <img v-if="slot.item" :key="slot.item.id" :src="slot.item.item.icon" class="icon"/>
           </Transition>
 
-          <span v-if="!slot.item" class="empty-text">Pusto</span>  </div>
-      </div>
-
-      <div v-if="selectedItem" class="details">
-        <h3>{{ selectedItem.item.name }}</h3>
-
-        <p class="description">
-          {{ selectedItem.item.description }}
-        </p>
-
-        <div class="stats">
-          <div v-if="selectedItem.item.healAmount">
-            ❤️ Leczy: {{ selectedItem.item.healAmount }} HP
-          </div>
-
-          <div v-if="selectedItem.item.attackBonus">
-            ⚔️ Atak: +{{ selectedItem.item.attackBonus }}
-          </div>
-
-          <div v-if="selectedItem.item.defenseBonus">
-            🛡️ Obrona: +{{ selectedItem.item.defenseBonus }}
-          </div>
-        </div>
-
-        <div class="actions">
-          <button v-if="selectedItem.item.itemType === 'Consumable'" @click="useItem(selectedItem.id)">
-            Użyj
-          </button>
-
-          <button v-else-if="selectedItem.item.itemType === 'Weapon'" @click="equipWeaponItem(selectedItem.id)">
-            Załóż broń
-          </button>
-
-          <button v-else-if="selectedItem.item.itemType === 'Clothing'" @click="equipClothingItem(selectedItem.id)">
-            Załóż ubranie
-          </button>
+          <TooltipItem v-if="slot.item && selectedItemId === slot.item.id" :item="slot.item.item"
+            @use="useItem(slot.item.id)" @equipWeapon="equipWeaponItem(slot.item.id)" @equipClothing="equipClothingItem(slot.item.id)"/>
         </div>
       </div>
 
@@ -212,11 +163,13 @@ onMounted(loadInventory)
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  position: relative;
 }
 
 .slot.empty {
   background: rgba(255, 255, 255, 0.15);
   border-style: dashed;
+  cursor: default;
 }
 
 .slot.selected {
@@ -224,42 +177,18 @@ onMounted(loadInventory)
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25);
 }
 
-.slot-enter-active,
-.slot-leave-active {
-  transition: all 0.25s ease;
-}
-
 .slot-enter-from {
   opacity: 0;
   transform: scale(0.8);
 }
 
-.slot-leave-to {
-  opacity: 0;
-  transform: scale(0.6);
+.slot-enter-active {
+  transition: all 0.2s ease;
 }
 
 .icon {
   max-width: 70%;
   max-height: 70%;
-}
-
-.details {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #8e866d;
-}
-
-.description {
-  font-size: 13px;
-  margin-bottom: 8px;
-  opacity: 0.85;
-}
-
-.stats {
-  font-size: 12px;
-  margin-bottom: 10px;
-  opacity: 0.85;
 }
 
 button {
@@ -275,14 +204,5 @@ button {
 .close {
   width: 100%;
   margin-top: 12px;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.actions button {
-  flex: 1;
 }
 </style>
