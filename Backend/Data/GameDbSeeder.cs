@@ -10,32 +10,38 @@ public static class GameDbSeeder
         if (await context.Items.AnyAsync())
             return;
 
-        var items = new List<Item>
-        {
-            new Item
+            var items = new List<Item>
             {
-                Code = "knife_basic",
-                Name = "Nóż",
-                ItemType = ItemType.Equipment,
-                Slot = EquipmentSlot.Weapon,
-                AttackBonus = 3
-            },
-            new Item
-            {
-                Code = "clothing_basic",
-                Name = "Proste Ubranie",
-                ItemType = ItemType.Equipment,
-                Slot = EquipmentSlot.Clothing,
-                DefenseBonus = 3
-            },
-            new Item
-            {
-                Code = "bandage_basic",
-                Name = "Bandaż",
-                ItemType = ItemType.Consumable,
-                HealAmount = 20
-            }
-        };
+                new Item
+                {
+                    Code = "knife_basic",
+                    Name = "Nóż",
+                    Description = "Zadaje 3 obrażenia.",
+                    Icon = "/icons/items/knife.png",
+                    ItemType = ItemType.Equipment,
+                    Slot = EquipmentSlot.Weapon,
+                    AttackBonus = 3
+                },
+                new Item
+                {
+                    Code = "clothing_basic",
+                    Name = "Proste ubranie",
+                    Description = "Daje 3 pancerza.",
+                    Icon = "/icons/items/clothing.png",
+                    ItemType = ItemType.Equipment,
+                    Slot = EquipmentSlot.Clothing,
+                    DefenseBonus = 3
+                },
+                new Item
+                {
+                    Code = "bandage_basic",
+                    Name = "Bandaż",
+                    Description = "Przywraca 20 HP.",
+                    Icon = "/icons/items/bandage.png",
+                    ItemType = ItemType.Consumable,
+                    HealAmount = 20
+                }
+            };
 
         context.Items.AddRange(items);
         await context.SaveChangesAsync();

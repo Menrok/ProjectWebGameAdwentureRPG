@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Backend.DTOs.Game;
 
 namespace Backend.Controllers;
 
@@ -83,18 +84,15 @@ public class GameController : ControllerBase
     }
 
     [HttpPost("location/action/{actionId}")]
-    public async Task<IActionResult> DoAction(string actionId)
+    public async Task<ActionResult<ActionResultDto>> DoAction(string actionId)
     {
         var player = await GetPlayer();
 
-        var resultText = _locationActionService.Execute(player, actionId);
+        var result = _locationActionService.Execute(player, actionId);
 
         await _db.SaveChangesAsync();
 
-        return Ok(new
-        {
-            Result = resultText
-        });
+        return Ok(result);
     }
 
     private async Task<Player> GetPlayer()

@@ -40,7 +40,17 @@ public class AuthService
         var player = new Player
         {
             UserId = user.Id,
-            Name = user.Username,
+            Name = "Lia",
+
+            Health = 10,
+            MaxHealth = 100,
+
+            BaseAttack = 5,
+            BaseDefense = 0,
+
+            CurrentChapter = StoryChapter.Prologue,
+            CurrentStoryNode = "prologue_intro",
+            CurrentLocationId = "beach"
         };
 
         _db.Players.Add(player);

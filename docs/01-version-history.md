@@ -46,3 +46,11 @@
 - Ujednolicono komunikaty błędów i sukcesu w formularzu.
 - Dodano bezpieczne uwierzytelnianie rejestracji po stronie backendu (ConfirmPassword).
 - Uporządkowano repozytorium: dodano `.gitignore` dla SQLite i migracji EF Core.
+
+## v0.0.5
+- Zaimplementowano spójny core gameplay loop: lokacja → akcja → rezultat → aktualizacja stanu.
+- Backend przejął pełną kontrolę nad walidacją dostępności i wykonywania akcji.
+- Ujednolicono obsługę akcji świata i fabuły w jeden przewidywalny flow gry.
+- Dodano centralny model wyniku akcji (ActionResult) zawierający komunikaty, nagrody i zmiany stanu.
+- Uporządkowano serwisy gameplayowe i ich odpowiedzialności.
+- Przygotowano stabilne kontrakty API pod dalszy rozwój frontendu.

@@ -1,5 +1,15 @@
 import { BackendClientBase } from "./BackendClientBase"
 
+export type ActionResultDto = {
+  text: string
+  items: {
+    code: string
+    name: string
+    icon: string
+  }[]
+  discoveredLocations: string[]
+}
+
 export class BackendClient extends BackendClientBase {
 
   // =========================
@@ -62,12 +72,11 @@ register(username: string, password: string, confirmPassword: string) {
   }
 
   doLocationAction(actionId: string) {
-    return this.request<{ Result: string }>(
+    return this.request<ActionResultDto>(
       `/api/game/location/action/${actionId}`,
       { method: "POST" }
     )
   }
-
   // =========================
   // INVENTORY
   // =========================

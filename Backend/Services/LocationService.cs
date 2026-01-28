@@ -14,9 +14,17 @@ public class LocationService
     {
         var current = GetCurrentLocation(player);
 
-        return current.ConnectedLocationIds
+        var connected = current.ConnectedLocationIds
             .Select(id => LocationsData.All[id])
             .ToList();
+
+        if (player.CurrentLocationId == "beach" &&
+            !player.Flags.Contains("forest_discovered"))
+        {
+            connected.RemoveAll(l => l.Id == "forest");
+        }
+
+        return connected;
     }
 
     public void MovePlayer(Player player, string targetLocationId)
@@ -25,6 +33,15 @@ public class LocationService
 
         if (!current.ConnectedLocationIds.Contains(targetLocationId))
             throw new InvalidOperationException("Nie można przejść do tej lokacji.");
+
+        if (current.Id == "beach" &&
+            targetLocationId == "forest" &&
+            !player.Flags.Contains("forest_discovered"))
+        {
+            throw new InvalidOperationException(
+                "Nie wiesz jeszcze, dokąd prowadzi ta droga."
+            );
+        }
 
         player.CurrentLocationId = targetLocationId;
     }

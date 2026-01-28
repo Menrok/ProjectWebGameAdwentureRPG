@@ -14,13 +14,13 @@ public class Player
     public Auth.User User { get; set; } = null!;
 
     [Required]
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; }
 
-    public int Health { get; set; } = 10;
-    public int MaxHealth { get; set; } = 100;
+    public int Health { get; set; }
+    public int MaxHealth { get; set; }
 
-    public int BaseAttack { get; set; } = 5;
-    public int BaseDefense { get; set; } = 0;
+    public int BaseAttack { get; set; }
+    public int BaseDefense { get; set; }
 
     public int? EquippedWeaponId { get; set; }
     public Item? EquippedWeapon { get; set; }
@@ -31,7 +31,7 @@ public class Player
     public ICollection<InventoryItem> Inventory { get; set; } = new List<InventoryItem>();
     
     public StoryChapter CurrentChapter { get; set; } = StoryChapter.Prologue;
-    public string? CurrentStoryNode { get; set; } = "prologue_intro";
-    public string CurrentLocationId { get; set; } = "beach";
+    public string? CurrentStoryNode { get; set; }
+    public string CurrentLocationId { get; set; } = null!;
     public List<string> Flags { get; set; } = new();
 }

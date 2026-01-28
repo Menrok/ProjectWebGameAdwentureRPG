@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Services;
+using Backend.GameWorld.LocationActions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -20,6 +21,8 @@ builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<StoryService>();
 builder.Services.AddScoped<LocationService>();
 builder.Services.AddScoped<LocationActionService>();
+
+builder.Services.AddScoped<BeachAction>();
 
 builder.Services.AddAuthentication(options =>
 {

@@ -10,6 +10,8 @@ public class Item
     [MaxLength(50)]
     public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
+    public string Description { get; set; } = "";
+    public string Icon { get; set; } = "";
 
     public ItemType ItemType { get; set; }
 
@@ -19,4 +21,5 @@ public class Item
     public int DefenseBonus { get; set; }
 
     public int HealAmount { get; set; }
+
 }

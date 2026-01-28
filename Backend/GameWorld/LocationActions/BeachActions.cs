@@ -1,25 +1,138 @@
+using Backend.Data;
 using Backend.Models.Game;
+using Backend.DTOs.Game;
 
 namespace Backend.GameWorld.LocationActions;
 
-public static class BeachActions
+public class BeachAction
 {
-    public static List<LocationAction> GetActions(Player player)
+    private readonly GameDbContext _context;
+
+    public BeachAction(GameDbContext context)
     {
-        var actions = new List<LocationAction>();
+        _context = context;
+    }
 
-        actions.Add(new LocationAction
+    public ActionResultDto Execute(Player player, string actionId)
+    {
+        return actionId switch
         {
-            Id = "search_beach",
-            Text = "Przeszukaj plażę"
-        });
+            "search_beach" => SearchBeach(player),
+            "look_around" => LookAround(player),
+            "check_shore" => CheckShore(player),
+            _ => new ActionResultDto
+            {
+                Text = "Nie możesz tego teraz zrobić."
+            }
+        };
+    }
 
-        actions.Add(new LocationAction
+    public List<LocationAction> GetAvailableActions(Player player)
+    {
+        return new()
         {
-            Id = "rest_on_beach",
-            Text = "Usiądź i odpocznij"
-        });
+            new() { Id = "search_beach", Text = "Przeszukaj plażę" },
+            new() { Id = "check_shore", Text = "Sprawdź brzeg" },
+            new() { Id = "look_around", Text = "Rozejrzyj się" }
+        };
+    }
 
-        return actions;
+    private ActionResultDto SearchBeach(Player player)
+    {
+        if (player.Flags.Contains("beach_searched"))
+        {
+            return new ActionResultDto
+            {
+                Text = "Przeszukałaś już plażę. Nie znajdujesz niczego nowego."
+            };
+        }
+
+        player.Flags.Add("beach_searched");
+
+        var bandage = _context.Items.First(i => i.Code == "bandage_basic");
+        var clothes = _context.Items.First(i => i.Code == "clothing_basic");
+
+        AddToInventory(player, bandage);
+        AddToInventory(player, clothes);
+
+        return new ActionResultDto
+        {
+            Text =
+                "Przeszukujesz plażę.\n\n" +
+                "Wśród mokrego piasku znajdujesz bandaż oraz ubranie.",
+            Items =
+            {
+                new()
+                {
+                    Code = bandage.Code,
+                    Name = bandage.Name,
+                    Icon = bandage.Icon
+                },
+                new()
+                {
+                    Code = clothes.Code,
+                    Name = clothes.Name,
+                    Icon = clothes.Icon
+                }
+            }
+        };
+    }
+
+    private ActionResultDto LookAround(Player player)
+    {
+        if (player.Flags.Contains("forest_discovered"))
+        {
+            return new ActionResultDto
+            {
+                Text = "Już wiesz, że jedyna droga prowadzi w głąb wyspy."
+            };
+        }
+
+        player.Flags.Add("forest_discovered");
+
+        return new ActionResultDto
+        {
+            Text =
+                "Rozglądasz się uważnie.\n\n" +
+                "Plaża kończy się gęstym lasem. Między drzewami widać wąską ścieżkę.",
+            DiscoveredLocations = { "forest" }
+        };
+    }
+
+    private ActionResultDto CheckShore(Player player)
+    {
+        if (player.Flags.Contains("shore_checked"))
+        {
+            return new ActionResultDto
+            {
+                Text = "Nic się nie zmieniło. Tylko morze i cisza."
+            };
+        }
+
+        player.Flags.Add("shore_checked");
+
+        return new ActionResultDto
+        {
+            Text =
+                "Idziesz wzdłuż linii wody.\n\n" +
+                "Nie ma śladów innych ocalałych. Wygląda na to, że jesteś tu sama."
+        };
+    }
+
+    private void AddToInventory(Player player, Item item)
+    {
+        var existing = player.Inventory.FirstOrDefault(i => i.Item.Code == item.Code);
+
+        if (existing != null)
+        {
+            existing.Quantity++;
+            return;
+        }
+
+        player.Inventory.Add(new InventoryItem
+        {
+            Item = item,
+            Quantity = 1
+        });
     }
 }

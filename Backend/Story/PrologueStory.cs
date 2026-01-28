@@ -32,123 +32,36 @@ public static class PrologueStory
             Id = "prologue_wake",
             Text =
                 "Budzisz się na wilgotnym, zimnym piasku.\n" +
-                "Każdy oddech pali w płucach, a ciało boli tak, jakbyś spadła z klifu.\n\n" +
+                "Każdy oddech pali w płucach.\n\n" +
+                "Gdy próbujesz się poruszyć, przeszywa cię ból w ramieniu.\n" +
                 "Nad tobą rozciąga się szare, ciężkie niebo,\n" +
                 "a fale spokojnie muskają brzeg,\n" +
-                "jakby nocna burza nigdy nie miała miejsca.\n\n" +
-                "Wokół nie widać nikogo.",
+                "jakby nocna burza nigdy nie miała miejsca.",
             Choices = new()
             {
                 new StoryChoice
                 {
                     Text = "Spróbuj wstać",
-                    NextNodeId = "prologue_npc_appears"
+                    NextNodeId = "prologue_alone_beach"
                 }
             }
         },
 
         new StoryNode
         {
-            Id = "prologue_npc_appears",
+            Id = "prologue_alone_beach",
             Text =
-                "Gdy próbujesz się podnieść, zauważasz sylwetkę nadchodzącą z oddali.\n" +
-                "To mężczyzna z plecakiem przewieszonym przez ramię.\n" +
-                "Zatrzymuje się kilka kroków od ciebie i przygląda uważnie.\n\n" +
-                "— Cholera… żyjesz.\n\n" +
-                "Jego wzrok natychmiast pada na twoje ramię.\n\n" +
-                "— Jesteś ranna. To trzeba opatrzyć.",
+                "Podnosisz się powoli.\n\n" +
+                "Plaża jest pusta.\n" +
+                "Nie widać nikogo. Nie słychać głosów.\n\n" +
+                "Przy linii wody leżą pojedyncze szczątki —\n" +
+                "zbyt małe, by dawać nadzieję.\n\n" +
+                "Ramię boli coraz mocniej.",
             Choices = new()
             {
                 new StoryChoice
                 {
-                    Text = "Pozwól mu pomóc",
-                    NextNodeId = "prologue_give_bandage"
-                }
-            }
-        },
-
-        new StoryNode
-        {
-            Id = "prologue_give_bandage",
-            Text =
-                "Mężczyzna szybko sięga do plecaka i wyciąga bandaż.\n\n" +
-                "— Powinien zatrzymać krwawienie.\n\n" +
-                "Podaje ci bandaż.\n\n" +
-                "— Przyda się później.",
-            Choices = new()
-            {
-                new StoryChoice
-                {
-                    Text = "Spróbuj się podnieść",
-                    NextNodeId = "prologue_dialog"
-                }
-            }
-        },
-
-        new StoryNode
-        {
-            Id = "prologue_dialog",
-            IsDialog = true,
-            Text = "Mężczyzna patrzy na ciebie uważnie.",
-            Choices = new()
-            {
-                new StoryChoice
-                {
-                    Id = "ask_who",
-                    Text = "Kim jesteś?",
-                    NextNodeId = "prologue_ask_name"
-                },
-                new StoryChoice
-                {
-                    Id = "ask_where",
-                    Text = "Gdzie jestem?",
-                    ResponseText =
-                        "— Na wyspie. Nie ma jej na mapach. Statki tu nie przypływają.",
-                },
-                new StoryChoice
-                {
-                    Text = "Zakończ rozmowę",
-                    NextNodeId = "prologue_free_mode"
-                }
-            }
-        },
-
-        new StoryNode
-        {
-            Id = "prologue_ask_name",
-            IsDialog = true,
-            Text =
-                "— Jestem Leon. Mieszkam w niewielkiej wiosce po drugiej stronie lasu.\n\n" +
-                "— A ty?",
-            Choices = new()
-            {
-                new StoryChoice
-                {
-                    Text = "Przedstaw się",
-                    NextNodeId = "prologue_after_name"
-                }
-            }
-        },
-
-        new StoryNode
-        {
-            Id = "prologue_after_name",
-            IsDialog = true,
-            Text = 
-                "— Lia.\n\n" +
-                "Leon kiwa głową, jakby zapamiętał to imię.",
-            Choices = new()
-            {
-                new StoryChoice
-                {
-                    Id = "ask_where_after_name",
-                    Text = "Gdzie jestem?",
-                    ResponseText =
-                        "— Na wyspie. Nie ma jej na mapach. Statki tu nie przypływają.",
-                },
-                new StoryChoice
-                {
-                    Text = "Zakończ rozmowę",
+                    Text = "Rozejrzyj się",
                     NextNodeId = "prologue_end_scene"
                 }
             }
@@ -158,15 +71,16 @@ public static class PrologueStory
         {
             Id = "prologue_end_scene",
             Text =
-                "Leon odchodzi w stronę lasu.\n\n" +
-                "Zostajesz sama na plaży.\n\n" +
-                "Morze jest spokojne.\n" +
-                "Za plecami rozciąga się gęsty las.",
+                "Odwracasz się plecami do morza.\n\n" +
+                "Za tobą rozciąga się gęsty las.\n" +
+                "Ciemny, cichy, nieruchomy.\n\n" +
+                "Nie masz pojęcia, gdzie jesteś.\n" +
+                "Wiesz tylko jedno — nie możesz tu zostać.",
             Choices = new()
             {
                 new StoryChoice
                 {
-                    Text = "Rozejrzyj się",
+                    Text = "Zrób pierwszy krok",
                     NextNodeId = "prologue_free_mode"
                 }
             }
