@@ -14,7 +14,7 @@ public class Player
     public Auth.User User { get; set; } = null!;
 
     [Required]
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
     public int Health { get; set; }
     public int MaxHealth { get; set; }

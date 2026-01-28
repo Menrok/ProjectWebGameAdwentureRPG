@@ -18,7 +18,7 @@ public static class GameDbSeeder
                     Name = "Nóż",
                     Description = "Zadaje 3 obrażenia.",
                     Icon = "/icons/items/knife.png",
-                    ItemType = ItemType.Equipment,
+                    ItemType = ItemType.Weapon,
                     Slot = EquipmentSlot.Weapon,
                     AttackBonus = 3
                 },
@@ -28,7 +28,7 @@ public static class GameDbSeeder
                     Name = "Proste ubranie",
                     Description = "Daje 3 pancerza.",
                     Icon = "/icons/items/clothing.png",
-                    ItemType = ItemType.Equipment,
+                    ItemType = ItemType.Clothing,
                     Slot = EquipmentSlot.Clothing,
                     DefenseBonus = 3
                 },

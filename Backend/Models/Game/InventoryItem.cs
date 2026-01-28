@@ -15,6 +15,7 @@ public class InventoryItem
 
     public Item Item { get; set; } = null!;
 
+    public int? SlotIndex { get; set; }
     public bool IsEquipped { get; set; } = false;
 
     public int Quantity { get; set; } = 1;

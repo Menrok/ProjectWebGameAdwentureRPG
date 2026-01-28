@@ -59,20 +59,6 @@ public class StoryService
 
     private async Task HandleStoryEffects(Player player, string nodeId)
     {
-        if (nodeId == "prologue_give_bandage")
-        {
-            var bandage = await _context.Items
-                .FirstOrDefaultAsync(i => i.Code == BandageCode);
-
-            if (bandage == null)
-                throw new Exception("Bandage item not found in database");
-
-            await _inventoryService.AddItemToInventory(
-                player.Id,
-                bandage.Id
-            );
-        }
-
         if (nodeId == "prologue_free_mode")
         {
             player.CurrentChapter = StoryChapter.Prologue;

@@ -1,4 +1,5 @@
 using Backend.Services;
+using Backend.DTOs.Game;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -21,8 +22,28 @@ public class InventoryController : ControllerBase
     public async Task<IActionResult> GetInventory()
     {
         var playerId = GetPlayerId();
+
         var inventory = await _inventoryService.GetInventory(playerId);
-        return Ok(inventory);
+
+        var dto = inventory.Select(ii => new InventoryItemDto
+        {
+            Id = ii.Id,
+            SlotIndex = ii.SlotIndex,
+            IsEquipped = ii.IsEquipped,
+            Item = new ItemDto
+            {
+                Id = ii.Item.Id,
+                Name = ii.Item.Name,
+                Description = ii.Item.Description,
+                Icon = ii.Item.Icon,
+                ItemType = ii.Item.ItemType,
+                AttackBonus = ii.Item.AttackBonus,
+                DefenseBonus = ii.Item.DefenseBonus,
+                HealAmount = ii.Item.HealAmount
+            }
+        });
+
+        return Ok(dto);
     }
 
     [HttpPost("add/{itemId}")]
@@ -38,7 +59,7 @@ public class InventoryController : ControllerBase
     {
         var playerId = GetPlayerId();
         await _inventoryService.EquipWeapon(playerId, inventoryItemId);
-        return Ok();
+        return Ok(new { success = true });
     }
 
     [HttpPost("equip/clothing/{inventoryItemId}")]
@@ -46,7 +67,7 @@ public class InventoryController : ControllerBase
     {
         var playerId = GetPlayerId();
         await _inventoryService.EquipClothing(playerId, inventoryItemId);
-        return Ok();
+        return Ok(new { success = true });
     }
 
     [HttpPost("unequip/weapon")]
@@ -54,7 +75,7 @@ public class InventoryController : ControllerBase
     {
         var playerId = GetPlayerId();
         await _inventoryService.UnequipWeapon(playerId);
-        return Ok();
+        return Ok(new { success = true });
     }
 
     [HttpPost("unequip/clothing")]
@@ -62,7 +83,7 @@ public class InventoryController : ControllerBase
     {
         var playerId = GetPlayerId();
         await _inventoryService.UnequipClothing(playerId);
-        return Ok();
+        return Ok(new { success = true });
     }
 
     [HttpPost("use/{inventoryItemId}")]

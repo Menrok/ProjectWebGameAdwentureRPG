@@ -8,21 +8,23 @@ defineEmits<{
 
 type InventoryItem = {
   id: number
+  slotIndex: number
   item: {
     id: number
     name: string
     description: string
     icon: string
-    itemType: "Consumable" | "Equipment"
+    itemType: "Consumable" | "Weapon" | "Clothing" | "QuestItem"
     healAmount?: number
     attackBonus?: number
     defenseBonus?: number
   }
 }
 
-type InventorySlot =
-  | { empty: true }
-  | { empty: false; item: InventoryItem }
+type InventorySlot = {
+  index: number
+  item: InventoryItem | null
+}
 
 const MAX_SLOTS = 10
 
@@ -30,32 +32,28 @@ const loading = ref(true)
 const items = ref<InventoryItem[]>([])
 const selectedItem = ref<InventoryItem | null>(null)
 
-function mapItemType(value: number | string): "Consumable" | "Equipment" {
-  if (value === 0 || value === "Consumable") return "Consumable"
-  return "Equipment"
-}
-
 async function loadInventory() {
   loading.value = true
   try {
     const raw = await Backend.getInventory()
 
-    items.value = raw.map((i: any): InventoryItem => ({
-      id: i.id,
-      item: {
-        id: i.item.id,
-        name: i.item.name,
-        description: i.item.description,
-        icon: i.item.icon,
-        itemType: mapItemType(i.item.itemType),
-        healAmount: i.item.healAmount,
-        attackBonus: i.item.attackBonus,
-        defenseBonus: i.item.defenseBonus
-      }
-    }))
-  } catch (e) {
-    console.error("Inventory error", e)
-    items.value = []
+    items.value = raw
+      .filter((i: any) => !i.isEquipped)
+      .map((i: any): InventoryItem => ({
+        id: i.id,
+        slotIndex: i.slotIndex,
+        item: {
+          id: i.item.id,
+          name: i.item.name,
+          description: i.item.description,
+          icon: i.item.icon,
+          itemType: i.item.itemType,
+          healAmount: i.item.healAmount,
+          attackBonus: i.item.attackBonus,
+          defenseBonus: i.item.defenseBonus
+        }
+      }))
+
   } finally {
     loading.value = false
   }
@@ -69,34 +67,35 @@ async function loadInventory() {
 }
 
 const slots = computed<InventorySlot[]>(() => {
-  const filled = items.value.slice(0, MAX_SLOTS)
+  const result: InventorySlot[] = []
 
-  return [
-    ...filled.map(item => ({
-      empty: false as const,
-      item
-    })),
-    ...Array.from(
-      { length: MAX_SLOTS - filled.length },
-      () => ({ empty: true as const })
-    )
-  ]
+  for (let i = 0; i < MAX_SLOTS; i++) {
+    result.push({
+      index: i,
+      item: items.value.find(it => it.slotIndex === i) ?? null
+    })
+  }
+
+  return result
 })
 
 function selectSlot(slot: InventorySlot) {
-  if (slot.empty) {
-    selectedItem.value = null
-    return
-  }
-
   selectedItem.value = slot.item
 }
 
 async function useItem(inventoryItemId: number) {
-  items.value = items.value.filter(i => i.id !== inventoryItemId)
-  selectedItem.value = null
-
   await Backend.useItem(inventoryItemId)
+  await loadInventory()
+}
+
+async function equipWeaponItem(inventoryItemId: number) {
+  await Backend.equipWeapon(inventoryItemId)
+  await loadInventory()
+}
+
+async function equipClothingItem(inventoryItemId: number) {
+  await Backend.equipClothing(inventoryItemId)
+  await loadInventory()
 }
 
 onMounted(loadInventory)
@@ -112,18 +111,15 @@ onMounted(loadInventory)
       </div>
 
       <div v-else class="grid">
-        <div v-for="(slot, index) in slots" :key="index" class="slot" :class="{
-            empty: slot.empty, selected: !slot.empty && selectedItem?.id === slot.item.id
-          }"
-          @click="selectSlot(slot)">
-          <template v-if="!slot.empty">
-            <img v-if="slot.item.item.icon" :src="slot.item.item.icon" alt="" class="icon"/>
-          </template>
+        <div v-for="slot in slots" :key="slot.index" class="slot" :class="{
+            empty: !slot.item,
+            selected: slot.item && selectedItem?.id === slot.item.id
+          }" @click="selectSlot(slot)">
+          <Transition name="slot">
+            <img v-if="slot.item" :key="slot.item.id" :src="slot.item.item.icon" class="icon"/>
+          </Transition>
 
-          <template v-else>
-            <span class="empty-text">Pusto</span>
-          </template>
-        </div>
+          <span v-if="!slot.item" class="empty-text">Pusto</span>  </div>
       </div>
 
       <div v-if="selectedItem" class="details">
@@ -147,9 +143,19 @@ onMounted(loadInventory)
           </div>
         </div>
 
-        <button v-if="selectedItem.item.itemType === 'Consumable'" @click="useItem(selectedItem.id)">
-          Użyj
-        </button>
+        <div class="actions">
+          <button v-if="selectedItem.item.itemType === 'Consumable'" @click="useItem(selectedItem.id)">
+            Użyj
+          </button>
+
+          <button v-else-if="selectedItem.item.itemType === 'Weapon'" @click="equipWeaponItem(selectedItem.id)">
+            Załóż broń
+          </button>
+
+          <button v-else-if="selectedItem.item.itemType === 'Clothing'" @click="equipClothingItem(selectedItem.id)">
+            Załóż ubranie
+          </button>
+        </div>
       </div>
 
       <button class="close" @click="$emit('close')">
@@ -218,6 +224,21 @@ onMounted(loadInventory)
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25);
 }
 
+.slot-enter-active,
+.slot-leave-active {
+  transition: all 0.25s ease;
+}
+
+.slot-enter-from {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.slot-leave-to {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
 .icon {
   max-width: 70%;
   max-height: 70%;
@@ -254,5 +275,14 @@ button {
 .close {
   width: 100%;
   margin-top: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actions button {
+  flex: 1;
 }
 </style>

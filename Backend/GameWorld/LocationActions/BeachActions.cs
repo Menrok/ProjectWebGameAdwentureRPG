@@ -1,16 +1,21 @@
 using Backend.Data;
 using Backend.Models.Game;
 using Backend.DTOs.Game;
+using Backend.Services;
 
 namespace Backend.GameWorld.LocationActions;
 
 public class BeachAction
 {
     private readonly GameDbContext _context;
+    private readonly InventoryService _inventoryService;
 
-    public BeachAction(GameDbContext context)
+    public BeachAction(
+        GameDbContext context,
+        InventoryService inventoryService)
     {
         _context = context;
+        _inventoryService = inventoryService;
     }
 
     public ActionResultDto Execute(Player player, string actionId)
@@ -52,8 +57,11 @@ public class BeachAction
         var bandage = _context.Items.First(i => i.Code == "bandage_basic");
         var clothes = _context.Items.First(i => i.Code == "clothing_basic");
 
-        AddToInventory(player, bandage);
-        AddToInventory(player, clothes);
+        _inventoryService.AddItemToInventory(player.Id, bandage.Id)
+            .GetAwaiter().GetResult();
+
+        _inventoryService.AddItemToInventory(player.Id, clothes.Id)
+            .GetAwaiter().GetResult();
 
         return new ActionResultDto
         {
@@ -117,22 +125,5 @@ public class BeachAction
                 "Idziesz wzdłuż linii wody.\n\n" +
                 "Nie ma śladów innych ocalałych. Wygląda na to, że jesteś tu sama."
         };
-    }
-
-    private void AddToInventory(Player player, Item item)
-    {
-        var existing = player.Inventory.FirstOrDefault(i => i.Item.Code == item.Code);
-
-        if (existing != null)
-        {
-            existing.Quantity++;
-            return;
-        }
-
-        player.Inventory.Add(new InventoryItem
-        {
-            Item = item,
-            Quantity = 1
-        });
     }
 }

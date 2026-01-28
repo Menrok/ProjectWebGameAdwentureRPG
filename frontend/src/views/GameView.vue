@@ -109,12 +109,11 @@ onMounted(initGame)
       <div v-if="initialLoading">        
         Ładowanie gry...
       </div>
-
-      <div v-else>
+      <Transition name="fade-slide" mode="out-in">
         <StoryView v-if="mode === 'Story'" @finished="fetchGameState"/>
-        <ActionView v-else-if="actionEvent" :text="actionEvent.text" @close="closeActionEvent"/>
-        <WorldView v-else-if="location" :location="location" :actions="actions" :connectedLocations="connectedLocations" @action="doAction" @move="moveTo"/>
-      </div>
+        <ActionView v-else-if="actionEvent" :text="actionEvent.text" :items="actionEvent.items" @close="closeActionEvent"/>
+        <WorldView v-else-if="location" :key="location.id" :location="location" :actions="actions" :connectedLocations="connectedLocations" @action="doAction" @move="moveTo"/>
+      </Transition>
     </main>
 
     <BottomBar @open-inventory="openInventory" @open-profile="openProfile" @open-journal="openJournal"/>
@@ -136,4 +135,20 @@ onMounted(initGame)
   flex: 1;
   padding: 16px;
 }
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 </style>

@@ -43,5 +43,9 @@ public class GameDbContext : DbContext
             .WithMany()
             .HasForeignKey(p => p.EquippedClothingId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<InventoryItem>()
+            .HasIndex(i => new { i.PlayerId, i.SlotIndex })
+            .IsUnique();
     }
 }

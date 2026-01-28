@@ -67,3 +67,11 @@
 - Dodano górny i dolny pasek nawigacji (TopBar, BottomBar).
 - Wprowadzono system ikon UI dla przedmiotów i elementów interfejsu.
 - Frontend umożliwia pełną interakcję z backendowym gameplay loopem.
+
+## v0.0.7
+- Uporządkowano system slotów ekwipunku.
+- Rozdzielono logikę **plecaka** i **założonego ekwipunku**.
+- Zaimplementowano pełną obsługę zakładania i zdejmowania ekwipunku.
+- Ujednolicono backendowy model ekwipunku.
+- Poprawiono synchronizację frontend–backend.
+- Uporządkowano modele i DTO.

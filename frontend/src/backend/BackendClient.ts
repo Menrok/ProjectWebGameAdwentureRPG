@@ -10,6 +10,22 @@ export type ActionResultDto = {
   discoveredLocations: string[]
 }
 
+export type InventoryItemDto = {
+  id: number
+  slotIndex: number
+  isEquipped: boolean
+  item: {
+    id: number
+    name: string
+    description: string
+    icon: string
+    itemType: "Consumable" | "Weapon" | "Clothing" | "QuestItem"
+    healAmount?: number
+    attackBonus?: number
+    defenseBonus?: number
+  }
+}
+
 export class BackendClient extends BackendClientBase {
 
   // =========================
@@ -82,14 +98,9 @@ register(username: string, password: string, confirmPassword: string) {
   // =========================
 
   getInventory() {
-    return this.request<{
-      id: number
-      item: {
-        id: number
-        name: string
-        itemType: string
-      }
-    }[]>("/api/game/inventory")
+    return this.request<InventoryItemDto[]>(
+      "/api/game/inventory"
+    )
   }
 
   addItem(itemId: number) {
