@@ -21,8 +21,10 @@ builder.Services
             new JsonStringEnumConverter()
         );
     });
-    
-builder.Services.AddDbContext<GameDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddDbContext<GameDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("Default"))
+);
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<InventoryService>();
@@ -50,7 +52,9 @@ builder.Services.AddAuthentication(options =>
 
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+        )
     };
 });
 
@@ -78,14 +82,26 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.UseCors("frontend");
 }
 
-app.UseHttpsRedirection();
-
-app.UseCors("frontend");
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapControllers();
+
+app.MapFallbackToFile("index.html");
+
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    app.Urls.Add($"http://*:{port}");
+}
+
 app.Run();

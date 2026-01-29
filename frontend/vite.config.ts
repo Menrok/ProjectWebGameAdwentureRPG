@@ -9,6 +9,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src")
     }
   },
+
   server: {
     proxy: {
       "/api": {
@@ -16,5 +17,10 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+
+  build: {
+    outDir: "../Backend/wwwroot",
+    emptyOutDir: true
   }
 })
