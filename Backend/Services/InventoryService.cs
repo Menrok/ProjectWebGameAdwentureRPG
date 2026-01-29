@@ -203,4 +203,20 @@ public class InventoryService
 
         throw new Exception("Inventory full");
     }
+
+    public bool HasItem(int playerId, string itemCode)
+    {
+        return _context.InventoryItems.Include(ii => ii.Item).Any(ii => ii.PlayerId == playerId && ii.Item.Code == itemCode);
+    }
+
+    public async Task RemoveItemFromInventory(int playerId, int itemId)
+    {
+        var inventoryItem = await _context.InventoryItems.FirstOrDefaultAsync(ii => ii.PlayerId == playerId && ii.ItemId == itemId);
+
+        if (inventoryItem == null)
+            throw new Exception("Item not found in inventory");
+
+        _context.InventoryItems.Remove(inventoryItem);
+        await _context.SaveChangesAsync();
+    }
 }

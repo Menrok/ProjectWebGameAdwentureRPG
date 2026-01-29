@@ -81,3 +81,42 @@
 - Wydzielono wspólne typy (Item, PlayerStatus) do osobnego katalogu.
 - Zaimplementowano jeden wspólny komponent tooltipa dla przedmiotów.
 - Dodano obsługę akcji: użycie, zakładanie i zdejmowanie ekwipunku.
+
+## v0.0.9
+
+### Świat gry
+- Rozszerzono świat gry o nowe lokacje:
+  - Las (rozbudowany),
+  - Dom na polanie (lokacja z NPC),
+  - Jaskinia,
+  - Wioska (odkrywana fabularnie).
+- Dodano mapę świata z wizualnym rozmieszczeniem lokacji.
+- Zaimplementowano system odkrywania lokacji oparty o flagi świata.
+- Dodano wizualne połączenia pomiędzy lokacjami (animowane ścieżki na mapie).
+- Wprowadzono swobodne przemieszczanie się pomiędzy odkrytymi lokacjami.
+- Zaimplementowano interaktywny widok mapy z możliwością przeciągania (drag).
+
+### Interakcje i fabuła
+- Dodano modal interakcji z lokacją, niewymagający przeładowania widoku.
+- Backend przejął pełną kontrolę nad dostępnością lokacji i ich odblokowaniem.
+- Dodano NPC w Domu na polanie.
+- Zaimplementowano zadanie typu fetch quest:
+  - przedmiot pojawia się w ekwipunku,
+  - po oddaniu NPC znika z plecaka,
+  - wykonanie zadania odblokowuje nową lokację.
+- Dodano nowy przedmiot questowy (leśne ziele) oraz mechanizm jego usuwania z ekwipunku.
+- Ujednolicono system akcji lokacji (plaża, las, dom na polanie).
+- Poprawiono synchronizację stanu gry po wykonaniu akcji (bez potrzeby odświeżania strony).
+
+### UI / UX
+- Przebudowano cały interfejs gry do spójnego stylu thriller/survival:
+  - mapę świata jako pełnoekranowy widok,
+  - górny i dolny pasek HUD,
+  - modale (ekwipunek, profil, dziennik, interakcje),
+  - tooltipy przedmiotów.
+- Oddzielono warstwę świata gry od warstwy interfejsu (pływające panele UI).
+- Naprawiono problemy z layoutem i nieprawidłowym centrowaniem mapy.
+
+### Techniczne
+- Ujednolicono identyfikatory akcji lokacji (frontend ↔ backend).
+- Naprawiono błąd uniemożliwiający wykonanie niektórych akcji fabularnych.

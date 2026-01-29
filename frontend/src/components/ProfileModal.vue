@@ -136,8 +136,9 @@ onMounted(loadPlayer)
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(1px);
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -146,55 +147,59 @@ onMounted(loadPlayer)
 
 .modal {
   width: 94%;
-  max-width: 480px;
-  padding: 20px 18px 18px;
-  background: linear-gradient(180deg, #e6dec5 0%, #d6ccb0 100%);
-  color: #2b2a24;
-  border: 1px solid #8e866d;
-  border-radius: 12px;
+  max-width: 520px;
+  padding: 22px 22px 20px;
+
+  background: rgba(14, 17, 21, 0.9);
+  backdrop-filter: blur(10px);
+
+  color: #e5e7eb;
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+
   box-shadow:
-    inset 0 0 30px rgba(0, 0, 0, 0.25),
-    0 25px 60px rgba(0, 0, 0, 0.8);
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 30px 70px rgba(0,0,0,0.9);
 }
 
 .modal h2 {
   text-align: center;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+
   font-weight: 600;
+  letter-spacing: 0.6px;
+  color: #d1d5db;
 }
 
 .content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 18px;
 }
 
 .left {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.right {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  gap: 14px;
 }
 
 .name {
   font-size: 20px;
   font-weight: 700;
   text-align: center;
+  letter-spacing: 0.4px;
 }
 
 .hp-label {
   font-size: 12px;
-  margin-bottom: 4px;
+  opacity: 0.75;
+  margin-bottom: 6px;
 }
 
 .hp-bar {
   height: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255,255,255,0.08);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -208,37 +213,61 @@ onMounted(loadPlayer)
 .stats {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .stat {
   display: flex;
   justify-content: space-between;
-  padding: 6px 8px;
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid #8e866d;
-  border-radius: 6px;
+  align-items: center;
+
+  padding: 8px 10px;
+
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+
   font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
+.right {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .equipment-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  justify-items: center;
+  gap: 10px;
 }
 
 .slot {
   aspect-ratio: 1 / 1;
-  width: 64px;
+  width: 72px;
 
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid #7a745e;
-  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.slot:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.slot.empty {
+  background: rgba(255,255,255,0.02);
+  border-style: dashed;
+  cursor: default;
 }
 
 .slot-label {
@@ -250,39 +279,37 @@ onMounted(loadPlayer)
   justify-content: center;
 
   font-size: 12px;
-  opacity: 0.55;
+  opacity: 0.45;
   text-align: center;
   pointer-events: none;
 }
 
-.slot.empty {
-  background: rgba(255, 255, 255, 0.15);
-  border-style: dashed;
-}
-
 .icon {
-  max-width: 70%;
-  max-height: 70%;
-}
-
-.empty-text {
-  font-size: 14px;
-  opacity: 0.4;
+  max-width: 72%;
+  max-height: 72%;
+  filter:
+    drop-shadow(0 2px 6px rgba(0,0,0,0.9));
 }
 
 button {
-  margin-top: 14px;
+  margin-top: 16px;
   width: 100%;
-  background: linear-gradient(180deg, #4b5563, #1f2933);
-  border: 1px solid #111827;
-  border-radius: 6px;
+
+  background: rgba(20, 24, 28, 0.9);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+
   color: #e5e7eb;
-  padding: 8px 12px;
+  padding: 10px 14px;
+
   font-weight: 600;
+  letter-spacing: 0.3px;
   cursor: pointer;
+
+  transition: background 0.15s ease;
 }
 
 button:hover {
-  background: linear-gradient(180deg, #64748b, #1f2937);
+  background: rgba(30, 36, 42, 0.9);
 }
 </style>

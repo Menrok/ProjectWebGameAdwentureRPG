@@ -67,7 +67,9 @@ public class GameController : ControllerBase
                 l.Id,
                 l.Name
             }),
-            Actions = actions
+            Actions = actions,
+
+            Flags = player.Flags
         });
     }
 

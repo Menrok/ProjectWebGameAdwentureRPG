@@ -24,6 +24,24 @@ public class LocationService
             connected.RemoveAll(l => l.Id == "forest");
         }
 
+        if (player.CurrentLocationId == "forest" &&
+            !player.Flags.Contains("clearing_house_discovered"))
+        {
+            connected.RemoveAll(l => l.Id == "clearing_house");
+        }
+
+        if (player.CurrentLocationId == "forest" &&
+            !player.Flags.Contains("cave_discovered"))
+        {
+            connected.RemoveAll(l => l.Id == "cave");
+        }
+        
+        if (player.CurrentLocationId == "clearing_house" &&
+            !player.Flags.Contains("village_discovered"))
+        {
+            connected.RemoveAll(l => l.Id == "village");
+        }
+
         return connected;
     }
 
@@ -37,6 +55,7 @@ public class LocationService
         if (current.Id == "beach" &&
             targetLocationId == "forest" &&
             !player.Flags.Contains("forest_discovered"))
+            
         {
             throw new InvalidOperationException(
                 "Nie wiesz jeszcze, dokąd prowadzi ta droga."

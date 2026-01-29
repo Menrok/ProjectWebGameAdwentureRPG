@@ -1,6 +1,6 @@
 using Backend.Models.Game;
 
-namespace Backend.Story;
+namespace Backend.GameWorld;
 
 public static class PrologueStory
 {

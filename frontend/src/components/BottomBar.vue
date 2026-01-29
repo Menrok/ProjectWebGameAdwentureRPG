@@ -12,50 +12,44 @@ defineEmits<{
 
 <template>
   <footer class="bottom-bar">
-    <button class="icon-button" @click="$emit('open-profile')" aria-label="Otwórz profil gracza">
-      <img :src="profileIcon" alt="Profil gracza" class="icon-image" />
+    <button class="icon-button" @click="$emit('open-profile')">
+      <img :src="profileIcon" alt="Profil" />
     </button>
 
-    <button class="icon-button" @click="$emit('open-inventory')" aria-label="Otwórz plecak">
-      <img :src="backpackIcon" alt="Plecak" class="icon-image" />
+    <button class="icon-button main" @click="$emit('open-inventory')">
+      <img :src="backpackIcon" alt="Plecak" />
     </button>
-    <button class="icon-button" @click="$emit('open-journal')" aria-label="Otwórz dziennik zadań">
-      <img :src="bookIcon" alt="Dziennik zadań" class="icon-image" />
+
+    <button class="icon-button" @click="$emit('open-journal')">
+      <img :src="bookIcon" alt="Dziennik" />
     </button>
   </footer>
 </template>
 
+
 <style scoped>
 .bottom-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
 
   height: 64px;
-  min-width: 340px;
-  padding: 8px 20px 12px;
+  padding: 0 42px;
 
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 44px;
 
-  background:
-    linear-gradient(
-      180deg,
-      #e6dec5 0%,
-      #d6ccb0 100%
-    );
+  background: rgba(12, 15, 18, 0.75);
+  backdrop-filter: blur(12px);
 
-  border: 1px solid #8e866d;
-  border-bottom: none;
-
-  border-radius: 60px 60px 0 0;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
 
   box-shadow:
-    inset 0 0 30px rgba(0, 0, 0, 0.25),
-    0 -10px 30px rgba(0, 0, 0, 0.6);
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 20px 40px rgba(0,0,0,0.9);
 
   z-index: 100;
 }
@@ -64,30 +58,36 @@ defineEmits<{
   background: none;
   border: none;
   padding: 0;
-  margin: 0;
-
   cursor: pointer;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.icon-image {
-  width: 64px;
-  height: 64px;
+.icon-button img {
+  width: 45px;
+  height: 45px;
 
-  display: block;
-
-  transition: transform 0.12s ease, filter 0.12s ease;
+  filter:
+    drop-shadow(0 0 8px rgba(0,0,0,0.9));
 }
 
-.icon-button:hover .icon-image {
-  transform: scale(1.06);
-  filter: brightness(1.05);
+.icon-button:hover {
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
-.icon-button:active .icon-image {
-  transform: scale(0.96);
+.icon-button:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* centralny przycisk – delikatnie ważniejszy */
+.icon-button.main {
+  opacity: 1;
+}
+
+.icon-button.main img {
+  filter:
+    drop-shadow(0 0 10px rgba(255,255,255,0.15));
 }
 </style>

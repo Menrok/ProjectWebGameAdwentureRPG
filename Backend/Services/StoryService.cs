@@ -1,6 +1,6 @@
 using Backend.Data;
 using Backend.Models.Game;
-using Backend.Story;
+using Backend.GameWorld;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -63,6 +63,7 @@ public class StoryService
         {
             player.CurrentChapter = StoryChapter.Prologue;
             player.CurrentStoryNode = null;
+            player.Flags.Add("beach_discovered");
             player.CurrentLocationId = "beach";
         }
     }

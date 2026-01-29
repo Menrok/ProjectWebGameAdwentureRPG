@@ -40,6 +40,16 @@ public static class GameDbSeeder
                     Icon = "/icons/items/bandage.png",
                     ItemType = ItemType.Consumable,
                     HealAmount = 20
+                },
+
+                // QUEST ITEM
+                new Item
+                {
+                    Code = "forest_herb",
+                    Name = "Rzadkie ziele",
+                    Description = "Rzadko spotykana roślina o intensywnym zapachu.",
+                    Icon = "/icons/itemsquest/forestherb.png",
+                    ItemType = ItemType.QuestItem,
                 }
             };
 

@@ -31,6 +31,8 @@ builder.Services.AddScoped<LocationService>();
 builder.Services.AddScoped<LocationActionService>();
 
 builder.Services.AddScoped<BeachAction>();
+builder.Services.AddScoped<ForestAction>();
+builder.Services.AddScoped<ClearingHouseAction>();
 
 builder.Services.AddAuthentication(options =>
 {

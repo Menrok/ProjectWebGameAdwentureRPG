@@ -5,18 +5,16 @@ import { useRouter } from "vue-router"
 import TopBar from "@/components/TopBar.vue"
 import BottomBar from "@/components/BottomBar.vue"
 import InventoryModal from "@/components/InventoryModal.vue"
-import StoryView from "@/components/StoryView.vue"
 import WorldView from "@/components/WorldView.vue"
 import ProfileModal from "@/components/ProfileModal.vue"
 import JournalModal from "@/components/JournalModal.vue"
-import ActionView from "@/components/ActionView.vue"
-import type { ActionResultDto } from "@/backend/BackendClient"
+import IntroView from "@/components/IntroView.vue"
 
 const router = useRouter()
 
 const initialLoading = ref(true)
 
-const mode = ref<"Story" | "World">("Story")
+const mode = ref<"Story" | "World" | null>(null)
 const locationName = ref("")
 const showInventory = ref(false)
 const showProfile = ref(false)
@@ -24,8 +22,8 @@ const showJournal = ref(false)
 
 const location = ref<any>(null)
 const actions = ref<any[]>([])
-const actionEvent = ref<ActionResultDto | null>(null)
 const connectedLocations = ref<any[]>([])
+const flags = ref<string[]>([])
 
 async function fetchGameState() {
   try {
@@ -36,6 +34,7 @@ async function fetchGameState() {
       location.value = state.location ?? null
       actions.value = state.actions ?? []
       connectedLocations.value = state.connectedLocations ?? []
+      flags.value = state.flags ?? []
       locationName.value = state.location?.name ?? ""
     } else {
       location.value = null
@@ -47,6 +46,10 @@ async function fetchGameState() {
     localStorage.removeItem("token")
     router.push("/")
   }
+}
+
+async function onIntroFinished() {
+  await fetchGameState()
 }
 
 async function initGame() {
@@ -83,15 +86,6 @@ function closeJournal() {
   showJournal.value = false
 }
 
-async function doAction(actionId: string) {
-  actionEvent.value = await Backend.doLocationAction(actionId)
-}
-
-async function closeActionEvent() {
-  actionEvent.value = null
-  await fetchGameState()
-}
-
 async function moveTo(locationId: string) {
   await Backend.moveToLocation(locationId)
   await fetchGameState()
@@ -100,27 +94,24 @@ async function moveTo(locationId: string) {
 onMounted(initGame)
 </script>
 
-
 <template>
   <div class="game-layout">
-    <TopBar :location="mode === 'World' ? locationName : ''" @logout="logout"/>
-
+    <TopBar v-if="mode === 'World'" :location="locationName" @logout="logout"/>
     <main class="game-content">
       <div v-if="initialLoading">        
         Ładowanie gry...
       </div>
+
       <Transition name="fade-slide" mode="out-in">
-        <StoryView v-if="mode === 'Story'" @finished="fetchGameState"/>
-        <ActionView v-else-if="actionEvent" :text="actionEvent.text" :items="actionEvent.items" @close="closeActionEvent"/>
-        <WorldView v-else-if="location" :key="location.id" :location="location" :actions="actions" :connectedLocations="connectedLocations" @action="doAction" @move="moveTo"/>
+        <IntroView v-if="mode === 'Story'" @finished="onIntroFinished"/>
+        <WorldView v-else-if="mode === 'World' && location" :location="location" :actions="actions" :connectedLocations="connectedLocations" :flags="flags" @move="moveTo" @refresh="fetchGameState"/>
       </Transition>
     </main>
 
-    <BottomBar @open-inventory="openInventory" @open-profile="openProfile" @open-journal="openJournal"/>
-
-    <InventoryModal v-if="showInventory" @close="closeInventory"/>
-    <ProfileModal v-if="showProfile" @close="closeProfile"/>
-    <JournalModal v-if="showJournal" @close="closeJournal"/>
+    <BottomBar v-if="mode === 'World'" @open-inventory="openInventory" @open-profile="openProfile" @open-journal="openJournal"/>
+      <InventoryModal v-if="showInventory" @close="closeInventory"/>
+      <ProfileModal v-if="showProfile" @close="closeProfile"/>
+      <JournalModal v-if="showJournal" @close="closeJournal"/>
   </div>
 </template>
 
@@ -133,7 +124,6 @@ onMounted(initGame)
 
 .game-content {
   flex: 1;
-  padding: 16px;
 }
 
 .fade-slide-enter-active,
@@ -150,5 +140,4 @@ onMounted(initGame)
   opacity: 0;
   transform: translateY(-10px);
 }
-
 </style>

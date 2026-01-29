@@ -73,6 +73,8 @@ register(username: string, password: string, confirmPassword: string) {
         id: string
         text: string
       }[]
+
+      flags: string[]
     }>("/api/game/state")
   }
 
