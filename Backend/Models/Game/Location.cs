@@ -7,4 +7,6 @@ public class Location
     public string Id { get; set; } = default!;
     public string Name { get; set; } = default!;
     public string Description { get; set; } = default!;
-    public List<string> ConnectedLocationIds { get; set; } = new();}
+    public List<string> ConnectedLocationIds { get; set; } = new();
+    public List<string> RequiredFlags { get; set; } = new();
+}

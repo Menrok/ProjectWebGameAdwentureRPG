@@ -17,7 +17,9 @@ public class Item
 
     public EquipmentSlot? Slot { get; set; }
 
-    public int AttackBonus { get; set; }
+    public int? MinDamage { get; set; }
+    public int? MaxDamage { get; set; }
+    
     public int DefenseBonus { get; set; }
 
     public int HealAmount { get; set; }

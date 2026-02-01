@@ -120,3 +120,20 @@
 ### Techniczne
 - Ujednolicono identyfikatory akcji lokacji (frontend ↔ backend).
 - Naprawiono błąd uniemożliwiający wykonanie niektórych akcji fabularnych.
+
+## v0.0.10
+
+### Modele domenowe
+- Uporządkowano strukturę modeli domenowych gry.
+- Ujednolicono enumy i typy domenowe (ItemType, TradeType, QuestStatus).
+- Doprecyzowano relacje pomiędzy:
+  - graczem,
+  - ekwipunkiem,
+  - zadaniami,
+  - flagami świata.
+- Przygotowano modele pod dalszą rozbudowę systemu handlu i questów.
+
+### Techniczne
+- Zrefaktoryzowano modele bez zmiany zachowania gameplayu.
+- Uproszczono kontrakty danych wykorzystywane przez serwisy i kontrolery.
+- Poprawiono czytelność i spójność warstwy Models.

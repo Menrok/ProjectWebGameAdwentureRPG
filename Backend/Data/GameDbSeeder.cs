@@ -16,21 +16,12 @@ public static class GameDbSeeder
                 {
                     Code = "knife_basic",
                     Name = "Nóż",
-                    Description = "Zadaje 3 obrażenia.",
+                    Description = "Zadaje 7–11 obrażeń.",
                     Icon = "/icons/items/knife.png",
-                    ItemType = ItemType.Weapon,
+                    ItemType = ItemType.Equipment,
                     Slot = EquipmentSlot.Weapon,
-                    AttackBonus = 3
-                },
-                new Item
-                {
-                    Code = "clothing_basic",
-                    Name = "Proste ubranie",
-                    Description = "Daje 3 pancerza.",
-                    Icon = "/icons/items/clothing.png",
-                    ItemType = ItemType.Clothing,
-                    Slot = EquipmentSlot.Clothing,
-                    DefenseBonus = 3
+                    MinDamage = 7,
+                    MaxDamage = 11
                 },
                 new Item
                 {
@@ -41,15 +32,22 @@ public static class GameDbSeeder
                     ItemType = ItemType.Consumable,
                     HealAmount = 20
                 },
-
-                // QUEST ITEM
+                new Item
+                {
+                    Code = "flashlight_basic",
+                    Name = "Latarka",
+                    Description = "Oświetla ciemne miejsca.",
+                    Icon = "/icons/items/flashlight.png",
+                    ItemType = ItemType.Equipment,
+                    Slot = null
+                },
                 new Item
                 {
                     Code = "forest_herb",
                     Name = "Rzadkie ziele",
-                    Description = "Rzadko spotykana roślina o intensywnym zapachu.",
+                    Description = "Przedmiot questowy.",
                     Icon = "/icons/itemsquest/forestherb.png",
-                    ItemType = ItemType.QuestItem,
+                    ItemType = ItemType.QuestItem
                 }
             };
 
