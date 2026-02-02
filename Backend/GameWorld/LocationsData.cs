@@ -12,12 +12,23 @@ public static class LocationsData
             Name = "Plaża",
             Description =
                 "Rozległa, kamienista plaża.\n" +
-                "Na piasku wciąż widać ślady sztormu.\n" +
+                "Na piasku wciąż widać ślady niedawnego sztormu.\n" +
                 "Morze jest spokojne, ale niepokojąco ciche.",
-            ConnectedLocationIds = new()
-            {
-                "forest"
-            }
+            ConnectedLocationIds = { "shipwreck", "forest" },
+
+
+        },
+
+        ["shipwreck"] = new Location
+        {
+            Id = "shipwreck",
+            Name = "Wrak statku",
+            Description =
+                "Rozbity statek leży częściowo zanurzony w wodzie.\n" +
+                "Kadłub jest przełamany, a wnętrze wygląda na naruszone już po katastrofie.\n" +
+                "To jedyne miejsce, gdzie możesz znaleźć coś użytecznego.",
+            ConnectedLocationIds = { "beach" },
+            RequiredFlags = { "shipwreck_discovered" }
         },
 
         ["forest"] = new Location
@@ -28,12 +39,20 @@ public static class LocationsData
                 "Gęsty, wilgotny las.\n" +
                 "Światło ledwo przebija się przez korony drzew.\n" +
                 "Między drzewami widać ślady dawnych ścieżek.",
-            ConnectedLocationIds = new()
-            {
-                "beach",
-                "clearing_house",
-                "cave"
-            }
+            ConnectedLocationIds = { "beach", "abandoned_camp" },
+            RequiredFlags = { "forest_discovered" }
+        },
+
+        ["abandoned_camp"] = new Location
+        {
+            Id = "abandoned_camp",
+            Name = "Opuszczony obóz",
+            Description =
+                "Prowizoryczny obóz na niewielkiej polanie.\n" +
+                "Wygaszone ognisko i porzucone wyposażenie.\n" +
+                "Ktoś był tu niedawno — i ruszył dalej.",
+            ConnectedLocationIds = { "forest", "cave", "village" },
+            RequiredFlags = { "camp_discovered" }
         },
 
         ["cave"] = new Location
@@ -41,41 +60,23 @@ public static class LocationsData
             Id = "cave",
             Name = "Jaskinia",
             Description =
-                "Wejście do jaskini ukryte jest między skałami.\n" +
+                "Wejście do jaskini ukryte jest między skałami u podnóża góry.\n" +
                 "Z wnętrza dobiega chłodny podmuch powietrza.\n" +
                 "Ciemność w środku zdaje się pochłaniać światło.",
-            ConnectedLocationIds = new()
-            {
-                "forest"
-            }
-        },
-
-        ["clearing_house"] = new Location
-        {
-            Id = "clearing_house",
-            Name = "Dom na polanie",
-            Description =
-                "Drewniany dom stoi na niewielkiej polanie, otoczony lasem.\n" +
-                "W oknach tli się słabe światło, a drzwi nie są zamknięte.\n" +
-                "Ktoś tu mieszka — i najwyraźniej nie śpi.",
-            ConnectedLocationIds = new()
-            {
-                "forest",
-                "village"
-            }
+            ConnectedLocationIds = { "abandoned_camp" },
+            RequiredFlags = { "cave_discovered" }
         },
 
         ["village"] = new Location
         {
             Id = "village",
-            Name = "Wioska",
+            Name = "Osada",
             Description =
-                "Niewielka osada przy rzece.\n" +
-                "Kilka drewnianych domów i tlące się ogniska.\n",
-            ConnectedLocationIds = new()
-            {
-                "clearing_house"
-            }
+                "Niewielka osada na skraju lasu.\n" +
+                "Kilka drewnianych baraków i tlące się ogniska.\n" +
+                "To jedyne miejsce, gdzie można zdobyć potrzebny sprzęt.",
+            ConnectedLocationIds = { "abandoned_camp" },
+            RequiredFlags = { "settlement_discovered" }
         }
     };
 }

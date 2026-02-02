@@ -137,3 +137,24 @@
 - Zrefaktoryzowano modele bez zmiany zachowania gameplayu.
 - Uproszczono kontrakty danych wykorzystywane przez serwisy i kontrolery.
 - Poprawiono czytelność i spójność warstwy Models.
+
+## v0.0.11
+
+### Player i statystyki
+- Dodano centralny system statystyk gracza (PlayerStatsService).
+- Zaimplementowano dynamiczne liczenie statystyk
+
+### Serwisy i kontrolery
+- Uporządkowano i ujednolicono odpowiedzialności serwisów gameplayowych.
+- Dopasowano kontrolery do aktualnych kontraktów API.
+- Usunięto niespójności pomiędzy frontendem a backendem.
+- Ujednolicono sposób pobierania gracza (UserId → Player).
+- Zredukowano logikę w kontrolerach na rzecz warstwy serwisów.
+
+### Techniczne
+- Uporządkowano DTO powiązane ze statusem gracza i ekwipunkiem.
+- Poprawiono spójność nazw endpointów w całym API.
+- Przygotowano architekturę pod dalszą rozbudowę gameplayu.
+
+### Interakcje i fabuła
+- Przerobiono i uporządkowano strukturę historii przygody gry.

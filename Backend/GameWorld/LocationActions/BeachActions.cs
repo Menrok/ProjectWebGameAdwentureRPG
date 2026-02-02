@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.Models.Game;
 using Backend.DTOs.Game;
+using Backend.GameWorld.Quests;
 using Backend.Services;
 
 namespace Backend.GameWorld.LocationActions;
@@ -8,23 +9,21 @@ namespace Backend.GameWorld.LocationActions;
 public class BeachAction
 {
     private readonly GameDbContext _context;
-    private readonly InventoryService _inventoryService;
+    private readonly QuestService _questService;
 
-    public BeachAction(
-        GameDbContext context,
-        InventoryService inventoryService)
+    public BeachAction(GameDbContext context, QuestService questService)
     {
         _context = context;
-        _inventoryService = inventoryService;
+        _questService = questService;
     }
 
     public ActionResultDto Execute(Player player, string actionId)
     {
         return actionId switch
         {
-            "search_beach" => SearchBeach(player),
             "look_around" => LookAround(player),
             "check_shore" => CheckShore(player),
+            "search_beach" => SearchBeach(player),
             _ => new ActionResultDto
             {
                 Text = "Nie możesz tego teraz zrobić."
@@ -34,96 +33,110 @@ public class BeachAction
 
     public List<LocationAction> GetAvailableActions(Player player)
     {
-        return new()
+        var actions = new List<LocationAction>
         {
-            new() { Id = "search_beach", Text = "Przeszukaj plażę" },
-            new() { Id = "check_shore", Text = "Sprawdź brzeg" },
-            new() { Id = "look_around", Text = "Rozejrzyj się" }
+            new() { Id = "look_around", Text = "Rozejrzyj się" },
+            new() { Id = "check_shore", Text = "Sprawdź brzeg" }
         };
-    }
 
-    private ActionResultDto SearchBeach(Player player)
-    {
-        if (player.Flags.Contains("beach_searched"))
+        if (!player.HasFlag("beach_searched"))
         {
-            return new ActionResultDto
+            actions.Add(new LocationAction
             {
-                Text = "Przeszukałaś już plażę. Nie znajdujesz niczego nowego."
-            };
+                Id = "search_beach",
+                Text = "Przeszukaj plażę"
+            });
         }
 
-        player.Flags.Add("beach_searched");
-
-        var bandage = _context.Items.First(i => i.Code == "bandage_basic");
-        var clothes = _context.Items.First(i => i.Code == "clothing_basic");
-
-        _inventoryService.AddItemToInventory(player.Id, bandage.Id)
-            .GetAwaiter().GetResult();
-
-        _inventoryService.AddItemToInventory(player.Id, clothes.Id)
-            .GetAwaiter().GetResult();
-
-        return new ActionResultDto
-        {
-            Text =
-                "Przeszukujesz plażę.\n\n" +
-                "Wśród mokrego piasku znajdujesz bandaż oraz ubranie.",
-            Items =
-            {
-                new()
-                {
-                    Code = bandage.Code,
-                    Name = bandage.Name,
-                    Icon = bandage.Icon
-                },
-                new()
-                {
-                    Code = clothes.Code,
-                    Name = clothes.Name,
-                    Icon = clothes.Icon
-                }
-            }
-        };
+        return actions;
     }
 
     private ActionResultDto LookAround(Player player)
     {
-        if (player.Flags.Contains("forest_discovered"))
+        var result = new ActionResultDto();
+
+        _questService.EnsureQuest(player, QuestIds.EscapeIsland);
+
+        var wreckDiscovered = player.HasFlag("shipwreck_discovered");
+        var forestDiscovered = player.HasFlag("forest_discovered");
+
+        if (!wreckDiscovered)
         {
-            return new ActionResultDto
-            {
-                Text = "Już wiesz, że jedyna droga prowadzi w głąb wyspy."
-            };
+            player.AddFlag("shipwreck_discovered");
+            player.AddFlag("forest_discovered");
+
+            _questService.AdvanceQuest(
+                player,
+                QuestIds.EscapeIsland,
+                1,
+                QuestDefinitions.EscapeIslandStage
+            );
+
+            result.Text =
+                "Rozglądasz się uważnie.\n\n" +
+                "Niedaleko, przy linii wody, dostrzegasz rozbity statek. " +
+                "To jedyne miejsce, gdzie możesz znaleźć cokolwiek użytecznego.\n\n" +
+                "Dalej, w głębi wyspy, zaczyna się gęsty las, ale instynkt podpowiada ci, " +
+                "że najpierw powinnaś sprawdzić wrak.";
+
+            result.DiscoveredLocations.Add("shipwreck");
+            result.DiscoveredLocations.Add("forest_edge");
+
+            return result;
         }
 
-        player.Flags.Add("forest_discovered");
-
-        return new ActionResultDto
+        if (!forestDiscovered)
         {
-            Text =
-                "Rozglądasz się uważnie.\n\n" +
-                "Plaża kończy się gęstym lasem. Między drzewami widać wąską ścieżkę.",
-            DiscoveredLocations = { "forest" }
-        };
+            player.AddFlag("forest_discovered");
+
+            result.Text =
+                "Zauważasz wąską ścieżkę prowadzącą w głąb lasu.\n\n" +
+                "Możesz tam pójść, ale masz wrażenie, że wrak statku wciąż skrywa odpowiedzi.";
+
+            result.DiscoveredLocations.Add("forest_edge");
+
+            return result;
+        }
+
+        result.Text =
+            "Plaża jest pusta i cicha.\n\n" +
+            "Wrak statku leży tam, gdzie go widziałaś. Las czeka w milczeniu.";
+
+        return result;
     }
 
     private ActionResultDto CheckShore(Player player)
     {
-        if (player.Flags.Contains("shore_checked"))
+        if (player.HasFlag("shore_checked"))
         {
             return new ActionResultDto
             {
-                Text = "Nic się nie zmieniło. Tylko morze i cisza."
+                Text = "Morze jest spokojne. Zbyt spokojne."
             };
         }
 
-        player.Flags.Add("shore_checked");
+        player.AddFlag("shore_checked");
 
         return new ActionResultDto
         {
             Text =
                 "Idziesz wzdłuż linii wody.\n\n" +
-                "Nie ma śladów innych ocalałych. Wygląda na to, że jesteś tu sama."
+                "Nie ma żadnych śladów innych ocalałych. " +
+                "Brak ciał jest bardziej niepokojący niż ich obecność."
+        };
+    }
+
+    private ActionResultDto SearchBeach(Player player)
+    {
+        player.AddFlag("beach_searched");
+
+        return new ActionResultDto
+        {
+            Text =
+                "Przeszukujesz plażę.\n\n" +
+                "Znajdujesz jedynie porozrzucane szczątki i fragmenty wyposażenia.\n\n" +
+                "Cokolwiek mogło pomóc w ucieczce, zniknęło razem ze sztormem. " +
+                "Jeśli chcesz przetrwać, musisz ruszyć dalej w głąb wyspy."
         };
     }
 }

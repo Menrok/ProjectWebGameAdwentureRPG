@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace Backend.Controllers.Game;
+namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/game/inventory")]
@@ -21,9 +21,8 @@ public class InventoryController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetInventory()
     {
-        var playerId = GetPlayerId();
-
-        var inventory = await _inventoryService.GetInventory(playerId);
+        var userId = GetUserId();
+        var inventory = await _inventoryService.GetInventory(userId);
 
         var dto = inventory.Select(ii => new InventoryItemDto
         {
@@ -37,7 +36,9 @@ public class InventoryController : ControllerBase
                 Description = ii.Item.Description,
                 Icon = ii.Item.Icon,
                 ItemType = ii.Item.ItemType,
-                AttackBonus = ii.Item.AttackBonus,
+                Slot = ii.Item.Slot,
+                MinDamage = ii.Item.MinDamage,
+                MaxDamage = ii.Item.MaxDamage,
                 DefenseBonus = ii.Item.DefenseBonus,
                 HealAmount = ii.Item.HealAmount
             }
@@ -49,61 +50,18 @@ public class InventoryController : ControllerBase
     [HttpPost("add/{itemId}")]
     public async Task<IActionResult> AddItemToInventory(int itemId)
     {
-        var playerId = GetPlayerId();
-        await _inventoryService.AddItemToInventory(playerId, itemId);
-        return Ok();
-    }
-
-    [HttpPost("equip/weapon/{inventoryItemId}")]
-    public async Task<IActionResult> EquipWeapon(int inventoryItemId)
-    {
-        var playerId = GetPlayerId();
-        await _inventoryService.EquipWeapon(playerId, inventoryItemId);
-        return Ok(new { success = true });
-    }
-
-    [HttpPost("equip/clothing/{inventoryItemId}")]
-    public async Task<IActionResult> EquipClothing(int inventoryItemId)
-    {
-        var playerId = GetPlayerId();
-        await _inventoryService.EquipClothing(playerId, inventoryItemId);
-        return Ok(new { success = true });
-    }
-
-    [HttpPost("unequip/weapon")]
-    public async Task<IActionResult> UnequipWeapon()
-    {
-        var playerId = GetPlayerId();
-        await _inventoryService.UnequipWeapon(playerId);
-        return Ok(new { success = true });
-    }
-
-    [HttpPost("unequip/clothing")]
-    public async Task<IActionResult> UnequipClothing()
-    {
-        var playerId = GetPlayerId();
-        await _inventoryService.UnequipClothing(playerId);
+        var userId = GetUserId();
+        await _inventoryService.AddItemToInventory(userId, itemId);
         return Ok(new { success = true });
     }
 
     [HttpPost("use/{inventoryItemId}")]
     public async Task<IActionResult> UseConsumable(int inventoryItemId)
     {
-        var playerId = GetPlayerId();
-        await _inventoryService.UseConsumable(playerId, inventoryItemId);
+        var userId = GetUserId();
+        await _inventoryService.UseConsumable(userId, inventoryItemId);
         return Ok(new { success = true });
     }
 
-    [HttpGet("status")]
-    public async Task<IActionResult> GetPlayerStatus()
-    {
-        var playerId = GetPlayerId();
-        var status = await _inventoryService.GetPlayerStatus(playerId);
-        return Ok(status);
-    }
-
-    private int GetPlayerId()
-    {
-        return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    }
+    private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

@@ -8,11 +8,13 @@ public class PlayerStatusDto
     public int Health { get; set; }
     public int MaxHealth { get; set; }
 
-    public int Attack { get; set; }
+    public int MinAttack { get; set; }
+    public int MaxAttack { get; set; }
     public int Defense { get; set; }
 
-    public string? Weapon { get; set; }
-    public string? Clothing { get; set; }
+    public int Crystals { get; set; }
+
+    public List<EquippedItemDto> EquippedItems { get; set; } = new();
 
     public int InventoryCount { get; set; }
 }

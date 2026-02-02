@@ -6,39 +6,56 @@ namespace Backend.Services;
 
 public class LocationActionService
 {
-    private readonly BeachAction _beachAction;
-    private readonly ForestAction _forestAction;
-    private readonly ClearingHouseAction _clearingHouseAction;
+    private readonly Dictionary<string, Func<Player, string, ActionResultDto>> _executeMap;
+    private readonly Dictionary<string, Func<Player, List<LocationAction>>> _actionsMap;
 
-    public LocationActionService( BeachAction beachAction, ForestAction forestAction, ClearingHouseAction clearingHouseAction)
+    public LocationActionService(
+        BeachAction beach,
+        ForestAction forest,
+        ShipwreckAction shipwreck,
+        AbandonedCampAction camp,
+        CaveEntranceAction cave,
+        SettlementAction settlement)
     {
-        _beachAction = beachAction;
-        _forestAction = forestAction;
-        _clearingHouseAction = clearingHouseAction;
+        _executeMap = new()
+        {
+            ["beach"] = beach.Execute,
+            ["forest"] = forest.Execute,
+            ["shipwreck"] = shipwreck.Execute,
+            ["abandoned_camp"] = camp.Execute,
+            ["cave"] = cave.Execute,
+            ["village"] = settlement.Execute
+        };
+
+        _actionsMap = new()
+        {
+            ["beach"] = beach.GetAvailableActions,
+            ["forest"] = forest.GetAvailableActions,
+            ["shipwreck"] = shipwreck.GetAvailableActions,
+            ["abandoned_camp"] = camp.GetAvailableActions,
+            ["cave"] = cave.GetAvailableActions,
+            ["village"] = settlement.GetAvailableActions
+        };
     }
 
     public ActionResultDto Execute(Player player, string actionId)
     {
-        return player.CurrentLocationId switch
+        if (!_executeMap.TryGetValue(player.CurrentLocationId, out var handler))
         {
-            "beach" => _beachAction.Execute(player, actionId),
-            "forest" => _forestAction.Execute(player, actionId),
-            "clearing_house" => _clearingHouseAction.Execute(player, actionId),
-            _ => new ActionResultDto
+            return new ActionResultDto
             {
                 Text = "Nie możesz tego teraz zrobić."
-            }
-        };
+            };
+        }
+
+        return handler(player, actionId);
     }
 
     public List<LocationAction> GetAvailableActions(Player player)
     {
-        return player.CurrentLocationId switch
-        {
-            "beach" => _beachAction.GetAvailableActions(player),
-            "forest" => _forestAction.GetAvailableActions(player),
-            "clearing_house" => _clearingHouseAction.GetAvailableActions(player),
-            _ => new()
-        };
+        if (!_actionsMap.TryGetValue(player.CurrentLocationId, out var handler))
+            return new();
+
+        return handler(player);
     }
 }

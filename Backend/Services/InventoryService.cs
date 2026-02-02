@@ -38,106 +38,15 @@ public class InventoryService
         await _context.SaveChangesAsync();
     }
 
-    public async Task EquipWeapon(int playerId, int inventoryItemId) => await EquipItem(playerId, inventoryItemId, EquipmentSlot.Weapon);
-
-    public async Task EquipClothing(int playerId, int inventoryItemId) => await EquipItem(playerId, inventoryItemId, EquipmentSlot.Clothing);
-
-    private async Task EquipItem(int playerId, int inventoryItemId, EquipmentSlot slot)
-    {
-        var inventoryItem = await _context.InventoryItems
-            .Include(ii => ii.Item)
-            .FirstOrDefaultAsync(ii =>
-                ii.Id == inventoryItemId &&
-                ii.PlayerId == playerId &&
-                !ii.IsEquipped);
-
-        if (inventoryItem == null)
-            throw new Exception("Item not found");
-
-        if (inventoryItem.Item.Slot != slot)
-            throw new Exception("Wrong slot");
-
-        var player = await _context.Players
-            .FirstAsync(p => p.Id == playerId);
-
-        if (slot == EquipmentSlot.Weapon && player.EquippedWeaponId != null)
-        {
-            await UnequipItem(playerId, EquipmentSlot.Weapon);
-        }
-
-        if (slot == EquipmentSlot.Clothing && player.EquippedClothingId != null)
-        {
-            await UnequipItem(playerId, EquipmentSlot.Clothing);
-        }
-
-        inventoryItem.IsEquipped = true;
-        inventoryItem.SlotIndex = null;
-
-        if (slot == EquipmentSlot.Weapon)
-            player.EquippedWeaponId = inventoryItem.ItemId;
-
-        if (slot == EquipmentSlot.Clothing)
-            player.EquippedClothingId = inventoryItem.ItemId;
-
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task UnequipWeapon(int playerId) => await UnequipItem(playerId, EquipmentSlot.Weapon);
-
-    public async Task UnequipClothing(int playerId) => await UnequipItem(playerId, EquipmentSlot.Clothing);
-
-    private async Task UnequipItem(int playerId, EquipmentSlot slot)
-    {
-        var player = await _context.Players
-            .FirstAsync(p => p.Id == playerId);
-
-        int? itemId = slot switch
-        {
-            EquipmentSlot.Weapon => player.EquippedWeaponId,
-            EquipmentSlot.Clothing => player.EquippedClothingId,
-            _ => null
-        };
-
-        if (itemId == null)
-            return;
-
-        var inventoryItem = await _context.InventoryItems
-            .FirstAsync(ii =>
-                ii.PlayerId == playerId &&
-                ii.ItemId == itemId &&
-                ii.IsEquipped);
-
-        var occupiedSlots = await _context.InventoryItems
-            .Where(ii => ii.PlayerId == playerId && ii.SlotIndex != null)
-            .Select(ii => ii.SlotIndex!.Value)
-            .ToListAsync();
-
-        int freeSlot = Enumerable.Range(0, MaxInventorySize)
-            .First(i => !occupiedSlots.Contains(i));
-
-        inventoryItem.IsEquipped = false;
-        inventoryItem.SlotIndex = freeSlot;
-
-        if (slot == EquipmentSlot.Weapon)
-            player.EquippedWeaponId = null;
-
-        if (slot == EquipmentSlot.Clothing)
-            player.EquippedClothingId = null;
-
-        await _context.SaveChangesAsync();
-    }
-
     public async Task UseConsumable(int playerId, int inventoryItemId)
     {
         var inventoryItem = await _context.InventoryItems
             .Include(ii => ii.Item)
             .Include(ii => ii.Player)
-            .FirstOrDefaultAsync(ii =>
-                ii.Id == inventoryItemId &&
-                ii.PlayerId == playerId);
-
-        if (inventoryItem == null)
-            throw new Exception("Item not found");
+            .FirstAsync(ii => ii.Id == inventoryItemId && ii.PlayerId == playerId);
+            
+        if (inventoryItem.Item.ItemType != ItemType.Consumable)
+            throw new InvalidOperationException("Tego przedmiotu nie można użyć.");
 
         inventoryItem.Player.Health = Math.Min(
             inventoryItem.Player.MaxHealth,
@@ -148,46 +57,11 @@ public class InventoryService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<PlayerStatusDto> GetPlayerStatus(int playerId)
+    public bool HasItem(int playerId, string itemCode)
     {
-        var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.Id == playerId);
-
-        if (player == null)
-            throw new Exception("Player not found");
-
-        var equippedItems = await _context.InventoryItems
+        return _context.InventoryItems
             .Include(ii => ii.Item)
-            .Where(ii =>
-                ii.PlayerId == playerId &&
-                ii.IsEquipped)
-            .ToListAsync();
-
-        var weapon = equippedItems
-            .FirstOrDefault(ii => ii.Item.Slot == EquipmentSlot.Weapon)
-            ?.Item;
-
-        var clothing = equippedItems
-            .FirstOrDefault(ii => ii.Item.Slot == EquipmentSlot.Clothing)
-            ?.Item;
-
-        return new PlayerStatusDto
-        {
-            PlayerId = player.Id,
-            Name = player.Name,
-
-            Health = player.Health,
-            MaxHealth = player.MaxHealth,
-
-            Attack = player.BaseAttack + (weapon?.AttackBonus ?? 0),
-            Defense = player.BaseDefense + (clothing?.DefenseBonus ?? 0),
-
-            Weapon = weapon?.Icon,
-            Clothing = clothing?.Icon,
-
-            InventoryCount = await _context.InventoryItems
-                .CountAsync(ii => ii.PlayerId == playerId && !ii.IsEquipped)
-        };
+            .Any(ii => ii.PlayerId == playerId && ii.Item.Code == itemCode);
     }
 
     private async Task<int> GetFreeSlot(int playerId)
@@ -202,21 +76,5 @@ public class InventoryService
                 return i;
 
         throw new Exception("Inventory full");
-    }
-
-    public bool HasItem(int playerId, string itemCode)
-    {
-        return _context.InventoryItems.Include(ii => ii.Item).Any(ii => ii.PlayerId == playerId && ii.Item.Code == itemCode);
-    }
-
-    public async Task RemoveItemFromInventory(int playerId, int itemId)
-    {
-        var inventoryItem = await _context.InventoryItems.FirstOrDefaultAsync(ii => ii.PlayerId == playerId && ii.ItemId == itemId);
-
-        if (inventoryItem == null)
-            throw new Exception("Item not found in inventory");
-
-        _context.InventoryItems.Remove(inventoryItem);
-        await _context.SaveChangesAsync();
     }
 }

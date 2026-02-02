@@ -11,7 +11,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 // SWAGGER
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new()
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Wpisz: Bearer {token}"
+    });
+
+    c.AddSecurityRequirement(new()
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services
     .AddControllers()
@@ -29,10 +55,18 @@ builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<StoryService>();
 builder.Services.AddScoped<LocationService>();
 builder.Services.AddScoped<LocationActionService>();
+builder.Services.AddScoped<CombatService>();
+builder.Services.AddScoped<TradeService>();
+builder.Services.AddScoped<QuestService>();
+builder.Services.AddScoped<EquipmentService>();
+builder.Services.AddScoped<PlayerStatsService>();
 
 builder.Services.AddScoped<BeachAction>();
 builder.Services.AddScoped<ForestAction>();
-builder.Services.AddScoped<ClearingHouseAction>();
+builder.Services.AddScoped<ShipwreckAction>();
+builder.Services.AddScoped<AbandonedCampAction>();
+builder.Services.AddScoped<CaveEntranceAction>();
+builder.Services.AddScoped<SettlementAction>();
 
 builder.Services.AddAuthentication(options =>
 {

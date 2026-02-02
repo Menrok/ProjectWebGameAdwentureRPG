@@ -12,9 +12,7 @@ public class StoryService
 
     private const string BandageCode = "bandage_basic";
 
-    public StoryService(
-        GameDbContext context,
-        InventoryService inventoryService)
+    public StoryService(GameDbContext context, InventoryService inventoryService)
     {
         _context = context;
         _inventoryService = inventoryService;
@@ -22,14 +20,15 @@ public class StoryService
 
     public async Task<StoryNode> GetCurrentNode(int playerId)
     {
-        var player = await _context.Players
-            .FirstOrDefaultAsync(p => p.Id == playerId);
+        var player = await _context.Players.Include(p => p.Flags).FirstOrDefaultAsync(p => p.Id == playerId);
 
         if (player == null)
             throw new Exception("Player not found");
 
-        var node = PrologueStory.Nodes
-            .FirstOrDefault(n => n.Id == player.CurrentStoryNode);
+        if (player.CurrentStoryNodeId == null)
+            throw new Exception("Player is not in story mode");
+
+        var node = PrologueStory.Nodes.FirstOrDefault(n => n.Id == player.CurrentStoryNodeId);
 
         if (node == null)
             throw new Exception("Story node not found");
@@ -39,7 +38,7 @@ public class StoryService
 
     public async Task<StoryNode> Choose(int playerId, string nextNodeId)
     {
-        var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == playerId);
+        var player = await _context.Players.Include(p => p.Flags).FirstOrDefaultAsync(p => p.Id == playerId);
 
         if (player == null)
             throw new Exception("Player not found");
@@ -49,11 +48,12 @@ public class StoryService
         if (nextNode == null)
             throw new Exception("Story node not found");
 
-        player.CurrentStoryNode = nextNodeId;
+        player.CurrentStoryNodeId = nextNodeId;
+
         await HandleStoryEffects(player, nextNodeId);
 
         await _context.SaveChangesAsync();
-        
+
         return nextNode;
     }
 
@@ -61,9 +61,10 @@ public class StoryService
     {
         if (nodeId == "prologue_free_mode")
         {
-            player.CurrentChapter = StoryChapter.Prologue;
-            player.CurrentStoryNode = null;
-            player.Flags.Add("beach_discovered");
+            player.CurrentStoryNodeId = null;
+
+            player.AddFlag("beach_discovered");
+
             player.CurrentLocationId = "beach";
         }
     }

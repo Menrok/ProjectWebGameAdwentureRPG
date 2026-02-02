@@ -18,10 +18,7 @@ public class GameController : ControllerBase
     private readonly LocationService _locationService;
     private readonly LocationActionService _locationActionService;
 
-    public GameController(
-        GameDbContext db,
-        LocationService locationService,
-        LocationActionService locationActionService)
+    public GameController(GameDbContext db, LocationService locationService, LocationActionService locationActionService)
     {
         _db = db;
         _locationService = locationService;
@@ -33,12 +30,12 @@ public class GameController : ControllerBase
     {
         var player = await GetPlayer();
 
-        if (!string.IsNullOrEmpty(player.CurrentStoryNode))
+        if (!string.IsNullOrEmpty(player.CurrentStoryNodeId))
         {
             return Ok(new
             {
-                Mode = "Story",
-                StoryNode = player.CurrentStoryNode
+                mode = "Story",
+                storyNode = player.CurrentStoryNodeId
             });
         }
 
@@ -48,28 +45,27 @@ public class GameController : ControllerBase
 
         return Ok(new
         {
-            Mode = "World",
-            Player = new
+            mode = "World",
+            player = new
             {
                 player.Id,
                 player.Name,
                 player.Health,
                 player.MaxHealth
             },
-            Location = new
+            location = new
             {
                 location.Id,
                 location.Name,
                 location.Description
             },
-            ConnectedLocations = connected.Select(l => new
+            connectedLocations = connected.Select(l => new
             {
                 l.Id,
                 l.Name
             }),
-            Actions = actions,
-
-            Flags = player.Flags
+            actions,
+            flags = player.Flags
         });
     }
 
@@ -81,8 +77,7 @@ public class GameController : ControllerBase
         _locationService.MovePlayer(player, locationId);
 
         await _db.SaveChangesAsync();
-
-        return Ok(new { success = true });    
+        return Ok(new { success = true });
     }
 
     [HttpPost("location/action/{actionId}")]
@@ -93,22 +88,20 @@ public class GameController : ControllerBase
         var result = _locationActionService.Execute(player, actionId);
 
         await _db.SaveChangesAsync();
-
         return Ok(result);
     }
 
     private async Task<Player> GetPlayer()
     {
-        var userId = int.Parse(
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!
-        );
+        var userId = GetUserId();
 
-        var player = await _db.Players
-            .FirstOrDefaultAsync(p => p.UserId == userId);
+        var player = await _db.Players.Include(p => p.Flags).FirstOrDefaultAsync(p => p.UserId == userId);
 
         if (player == null)
             throw new Exception("Player not found");
 
         return player;
     }
+
+    protected int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

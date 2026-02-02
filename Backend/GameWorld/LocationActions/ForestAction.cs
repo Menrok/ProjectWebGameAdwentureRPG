@@ -2,28 +2,30 @@ using Backend.Data;
 using Backend.Models.Game;
 using Backend.DTOs.Game;
 using Backend.Services;
+using Backend.GameWorld.Quests;
 
 namespace Backend.GameWorld.LocationActions;
 
 public class ForestAction
 {
     private readonly GameDbContext _context;
-    private readonly InventoryService _inventoryService;
+    private readonly CombatService _combatService;
+    private readonly QuestService _questService;
 
-    public ForestAction(GameDbContext context, InventoryService inventoryService)
+    public ForestAction(GameDbContext context, CombatService combatService, QuestService questService)
     {
         _context = context;
-        _inventoryService = inventoryService;
+        _combatService = combatService;
+        _questService = questService;
     }
 
     public ActionResultDto Execute(Player player, string actionId)
     {
         return actionId switch
         {
-            "explore_paths" => ExplorePaths(player),
-            "look_around_forest" => LookAround(player),
-            "inspect_tracks" => InspectTracks(player),
-            "collect_forest_herb" => CollectForestHerb(player),
+            "enter_forest" => EnterForest(player),
+            "check_signs" => CheckSigns(player),
+            "follow_path" => FollowPath(player),
             _ => new ActionResultDto
             {
                 Text = "Nie możesz tego teraz zrobić."
@@ -35,120 +37,113 @@ public class ForestAction
     {
         var actions = new List<LocationAction>
         {
-            new() { Id = "explore_paths", Text = "Zbadaj stare ścieżki" },
-            new() { Id = "look_around_forest", Text = "Rozejrzyj się" },
-            new() { Id = "inspect_tracks", Text = "Zbadaj ślady na ziemi" }
+            new() { Id = "enter_forest", Text = "Wejdź do lasu" }
         };
 
-        if (
-            player.Flags.Contains("npc_requested_help") &&
-            !_inventoryService.HasItem(player.Id, "forest_herb")
-        )
+        if (!player.HasFlag("forest_signs_checked"))
         {
-            actions.Add(new()
+            actions.Add(new LocationAction
             {
-                Id = "collect_forest_herb",
-                Text = "Zbierz rzadkie ziele"
+                Id = "check_signs",
+                Text = "Zbadaj otoczenie"
             });
         }
+
+        actions.Add(new LocationAction
+        {
+            Id = "follow_path",
+            Text = "Podążaj ścieżką"
+        });
+
         return actions;
     }
 
-    private ActionResultDto ExplorePaths(Player player)
+    private ActionResultDto EnterForest(Player player)
     {
-        if (player.Flags.Contains("cave_discovered"))
+        if (player.HasFlag("forest_entered"))
         {
             return new ActionResultDto
             {
-                Text = "Znasz już te ścieżki. Jedna z nich prowadzi do jaskini."
+                Text =
+                    "Las jest cichy. Zbyt cichy.\n\n" +
+                    "Masz wrażenie, że coś tu nie pasuje."
             };
         }
 
-        player.Flags.Add("cave_discovered");
+        player.AddFlag("forest_entered");
+
+        _questService.AdvanceQuest(
+            player,
+            QuestIds.EscapeIsland,
+            1,
+            QuestDefinitions.EscapeIslandStage
+        );
 
         return new ActionResultDto
         {
             Text =
-                "Przedzierasz się przez zarośla, podążając za ledwo widoczną ścieżką.\n\n" +
-                "Po chwili docierasz do skalnego zbocza.\n" +
-                "Między korzeniami drzew widzisz ciemny otwór prowadzący w głąb góry.",
-            DiscoveredLocations = { "cave" }
+                "Wchodzisz między drzewa.\n\n" +
+                "Światło szybko znika, a powietrze robi się ciężkie. " +
+                "Każdy dźwięk odbija się echem, jakby las nasłuchiwał twoich kroków."
         };
     }
 
-    private ActionResultDto LookAround(Player player)
+    private ActionResultDto CheckSigns(Player player)
     {
-        if (player.Flags.Contains("clearing_house_discovered"))
-        {
-            return new ActionResultDto
-            {
-                Text = "Wiesz już, że niedaleko znajduje się polana z domem."
-            };
-        }
-
-        player.Flags.Add("clearing_house_discovered");
+        player.AddFlag("forest_signs_checked");
 
         return new ActionResultDto
         {
             Text =
-                "Rozglądasz się uważnie.\n\n" +
-                "Między drzewami dostrzegasz jaśniejszy obszar.\n" +
-                "Po chwili widzisz niewielką polanę i stojący na niej drewniany dom.",
-            DiscoveredLocations = { "clearing_house" }
+                "Przyglądasz się uważnie otoczeniu.\n\n" +
+                "Na drzewach widzisz nacięcia. Nie wyglądają na przypadkowe.\n\n" +
+                "Ktoś oznaczał drogę w głąb wyspy. I nie robił tego dla zabawy."
         };
     }
 
-    private ActionResultDto InspectTracks(Player player)
+    private ActionResultDto FollowPath(Player player)
     {
-        if (player.Flags.Contains("forest_tracks_checked"))
+        if (player.HasFlag("camp_discovered"))
         {
             return new ActionResultDto
             {
-                Text = "Ślady są stare, ale masz wrażenie, że ktoś nadal krąży po lesie."
+                Text = "To ta sama ścieżka. Prowadzi do opuszczonego obozu."
             };
         }
 
-        player.Flags.Add("forest_tracks_checked");
+        player.AddFlag("forest_path_taken");
+        player.AddFlag("camp_discovered");
+
+        _questService.AdvanceQuest(
+            player,
+            QuestIds.EscapeIsland,
+            2,
+            QuestDefinitions.EscapeIslandStage
+        );
+
+        if (!player.HasFlag("forest_hazard_triggered"))
+        {
+            player.AddFlag("forest_hazard_triggered");
+            _combatService.ApplyEnvironmentalDamage(player, 5);
+
+            return new ActionResultDto
+            {
+                Text =
+                    "Podążasz wąską ścieżką.\n\n" +
+                    "Ziemia pod stopami jest śliska. Na moment tracisz równowagę " +
+                    "i boleśnie uderzasz o korzeń.\n\n" +
+                    "To miejsce nie wybacza nieuwagi.",
+                HpChange = -5,
+                DiscoveredLocations = { "abandoned_camp" }
+            };
+        }
 
         return new ActionResultDto
         {
             Text =
-                "Przyglądasz się ziemi.\n\n" +
-                "Widzisz ślady butów. Nie są świeże, ale nie należą do ciebie.\n" +
-                "Las nie jest tak pusty, jak się wydawało."
-        };
-    }
-
-    private ActionResultDto CollectForestHerb(Player player)
-    {
-        if (_inventoryService.HasItem(player.Id, "forest_herb"))
-        {
-            return new ActionResultDto
-            {
-                Text = "Masz już to ziele. Nie potrzebujesz więcej."
-            };
-        }
-
-        var herb = _context.Items.First(i => i.Code == "forest_herb");
-        _inventoryService.AddItemToInventory(player.Id, herb.Id)
-            .GetAwaiter().GetResult();
-
-        return new ActionResultDto
-        {
-            Text =
-                "Zapuszczasz się głębiej w las.\n\n" +
-                "Po dłuższych poszukiwaniach znajdujesz niewielką roślinę\n" +
-                "o charakterystycznym zapachu.\n\n" +
-                "To musi być to, o czym mówił mieszkaniec polany.",
-            Items =
-            {
-                new()
-                {
-                    Code = herb.Code,
-                    Name = herb.Name,
-                    Icon = herb.Icon
-                }
-            }
+                "Podążasz oznaczoną ścieżką.\n\n" +
+                "Po chwili między drzewami wyłania się opuszczony obóz.",
+            DiscoveredLocations = { "abandoned_camp" }
         };
     }
 }

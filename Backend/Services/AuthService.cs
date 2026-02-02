@@ -42,14 +42,16 @@ public class AuthService
             UserId = user.Id,
             Name = "Lia",
 
-            Health = 10,
+            Health = 30,
             MaxHealth = 100,
 
-            BaseAttack = 5,
+            Crystals = 0,
+            
+            BaseMinAttack = 2,
+            BaseMaxAttack = 4,
             BaseDefense = 0,
 
-            CurrentChapter = StoryChapter.Prologue,
-            CurrentStoryNode = "prologue_intro",
+            CurrentStoryNodeId = "prologue_intro",
             CurrentLocationId = "beach"
         };
 
