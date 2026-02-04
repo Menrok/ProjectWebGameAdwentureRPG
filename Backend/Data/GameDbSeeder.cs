@@ -1,4 +1,5 @@
 using Backend.Models.Game;
+using Backend.GameWorld.Quests;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data;
@@ -7,9 +8,8 @@ public static class GameDbSeeder
 {
     public static async Task SeedAsync(GameDbContext context)
     {
-        if (await context.Items.AnyAsync())
-            return;
-
+        if (!await context.Items.AnyAsync())
+        {
             var items = new List<Item>
             {
                 new Item
@@ -38,8 +38,7 @@ public static class GameDbSeeder
                     Name = "Latarka",
                     Description = "Oświetla ciemne miejsca.",
                     Icon = "/icons/items/flashlight.png",
-                    ItemType = ItemType.Equipment,
-                    Slot = null
+                    ItemType = ItemType.Equipment
                 },
                 new Item
                 {
@@ -51,7 +50,18 @@ public static class GameDbSeeder
                 }
             };
 
-        context.Items.AddRange(items);
+            context.Items.AddRange(items);
+        }
+
+        if (!await context.Quests.AnyAsync())
+        {
+            context.Quests.AddRange(
+                QuestDefinitions.EscapeIsland,
+                QuestDefinitions.CaveMystery,
+                QuestDefinitions.Settlement
+            );
+        }
+
         await context.SaveChangesAsync();
     }
 }

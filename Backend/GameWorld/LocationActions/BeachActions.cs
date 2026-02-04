@@ -55,8 +55,6 @@ public class BeachAction
     {
         var result = new ActionResultDto();
 
-        _questService.EnsureQuest(player, QuestIds.EscapeIsland);
-
         var wreckDiscovered = player.HasFlag("shipwreck_discovered");
         var forestDiscovered = player.HasFlag("forest_discovered");
 

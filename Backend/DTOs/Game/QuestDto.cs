@@ -6,7 +6,8 @@ public class QuestDto
 {
     public string Id { get; set; } = "";
     public string Title { get; set; } = "";
-    public string Description { get; set; } = "";
-    public int Stage { get; set; }
-    public QuestStatus Status { get; set; }
+    public int CurrentStage { get; set; }
+    public string Status { get; set; } = "";
+
+    public List<QuestEntryDto> Entries { get; set; } = new();
 }

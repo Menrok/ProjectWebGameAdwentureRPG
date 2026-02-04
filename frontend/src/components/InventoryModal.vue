@@ -2,84 +2,49 @@
 import { onMounted, ref, computed } from "vue"
 import { Backend } from "@/backend"
 import TooltipItem from "@/components/TooltipItem.vue"
-import type { InventoryItemDto, InventorySlot } from "@/types/items"
-
-defineEmits<{
-  (e: "close"): void
-}>()
+import type { InventoryItemDto } from "@/backend/BackendClient"
 
 const MAX_SLOTS = 10
 
 const loading = ref(true)
 const items = ref<InventoryItemDto[]>([])
 const selectedItemId = ref<number | null>(null)
-const initialLoading = ref(true)
 
 async function loadInventory(showLoader = false) {
   if (showLoader) loading.value = true
 
   try {
     const raw = await Backend.getInventory()
-      items.value = raw
-        .filter((i: any) => !i.isEquipped)
-        .map((i: any): InventoryItemDto => ({
-          id: i.id,
-          slotIndex: i.slotIndex,
-          item: {
-            id: i.item.id,
-            name: i.item.name,
-            description: i.item.description,
-            icon: i.item.icon,
-            itemType: i.item.itemType,
-            healAmount: i.item.healAmount,
-            attackBonus: i.item.attackBonus,
-            defenseBonus: i.item.defenseBonus
-          }
-        }))
+
+    items.value = raw.filter(i => !i.isEquipped)
   } finally {
     loading.value = false
-    initialLoading.value = false
   }
 }
 
-const slots = computed<InventorySlot[]>(() => {
-  const result: InventorySlot[] = []
+const slots = computed(() =>
+  Array.from({ length: MAX_SLOTS }, (_, index) => ({
+    index,
+    item: items.value.find(i => i.slotIndex === index) ?? null
+  }))
+)
 
-  for (let i = 0; i < MAX_SLOTS; i++) {
-    result.push({
-      index: i,
-      item: items.value.find(it => it.slotIndex === i) ?? null
-    })
-  }
-
-  return result
-})
-
-function selectSlot(slot: InventorySlot) {
+function selectSlot(slot: { item: InventoryItemDto | null }) {
   if (!slot.item) return
 
-  if (selectedItemId.value === slot.item.id) {
-    selectedItemId.value = null
-  } else {
-    selectedItemId.value = slot.item.id
-  }
+  selectedItemId.value =
+    selectedItemId.value === slot.item.id ? null : slot.item.id
 }
 
 async function useItem(id: number) {
   await Backend.useItem(id)
-  items.value = items.value.filter(i => i.id !== id)
+  await loadInventory()
   selectedItemId.value = null
 }
 
-async function equipWeaponItem(id: number) {
-  await Backend.equipWeapon(id)
-  items.value = items.value.filter(i => i.id !== id)
-  selectedItemId.value = null
-}
-
-async function equipClothingItem(id: number) {
-  await Backend.equipClothing(id)
-  items.value = items.value.filter(i => i.id !== id)
+async function equipItem(id: number) {
+  await Backend.equipItem(id)
+  await loadInventory()
   selectedItemId.value = null
 }
 
@@ -91,31 +56,25 @@ onMounted(() => loadInventory(true))
     <div class="modal" @click.stop>
       <h2>Plecak</h2>
 
-      <div v-if="loading">
-        Ładowanie...
-      </div>
+      <div v-if="loading"></div>
 
       <div v-else class="grid">
         <div v-for="slot in slots" :key="slot.index" class="slot" :class="{
             empty: !slot.item,
             selected: slot.item && selectedItemId === slot.item.id
-          }" @click="selectSlot(slot)">
+          }"
+          @click="selectSlot(slot)">
+
           <Transition name="slot">
             <img v-if="slot.item" :key="slot.item.id" :src="slot.item.item.icon" class="icon"/>
           </Transition>
 
-          <TooltipItem v-if="slot.item && selectedItemId === slot.item.id" :item="slot.item.item"
-            @use="useItem(slot.item.id)" @equipWeapon="equipWeaponItem(slot.item.id)" @equipClothing="equipClothingItem(slot.item.id)"/>
+          <TooltipItem v-if="slot.item && selectedItemId === slot.item.id" :item="slot.item.item" @use="useItem(slot.item.id)" @equip="equipItem(slot.item.id)"/>
         </div>
       </div>
-
-      <button class="close" @click="$emit('close')">
-        Zamknij
-      </button>
     </div>
   </div>
 </template>
-
 <style scoped>
 .backdrop {
   position: fixed;

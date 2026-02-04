@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ItemDto } from "@/types/items"
+import type { ItemDto, } from "@/backend/BackendClient"
 
 defineProps<{
   item: ItemDto
@@ -8,8 +8,7 @@ defineProps<{
 
 defineEmits<{
   (e: "use"): void
-  (e: "equipWeapon"): void
-  (e: "equipClothing"): void
+  (e: "equip"): void
   (e: "unequip"): void
 }>()
 </script>
@@ -23,15 +22,30 @@ defineEmits<{
     </p>
 
     <div class="stats">
-      <div v-if="item.healAmount">❤️ Leczy: {{ item.healAmount }}</div>
-      <div v-if="item.attackBonus">⚔️ Atak: +{{ item.attackBonus }}</div>
-      <div v-if="item.defenseBonus">🛡️ Obrona: +{{ item.defenseBonus }}</div>
+      <div v-if="item.healAmount">
+        Leczy: {{ item.healAmount }}
+      </div>
+
+      <div v-if="item.minDamage || item.maxDamage">
+        Obrażenia: {{ item.minDamage ?? 0 }}–{{ item.maxDamage ?? 0 }}
+      </div>
+
+      <div v-if="item.defenseBonus">
+        Obrona: +{{ item.defenseBonus }}
+      </div>
     </div>
 
-    <button v-if="isEquipped" @click="$emit('unequip')">Zdejmij</button>
-    <button v-else-if="item.itemType === 'Consumable'" @click="$emit('use')">Użyj</button>
-    <button v-else-if="item.itemType === 'Weapon'" @click="$emit('equipWeapon')">Załóż broń</button>
-    <button v-else-if="item.itemType === 'Clothing'" @click="$emit('equipClothing')">Załóż ubranie</button>
+    <button v-if="isEquipped" @click="$emit('unequip')">
+      Zdejmij
+    </button>
+
+    <button v-else-if="item.itemType === 'Consumable'" @click="$emit('use')">
+      Użyj
+    </button>
+
+    <button v-else-if="item.itemType === 'Equipment'" @click="$emit('equip')">
+      Załóż
+    </button>
   </div>
 </template>
 

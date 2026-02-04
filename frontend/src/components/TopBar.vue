@@ -1,11 +1,17 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from "vue"
+
+const props = defineProps<{
   location?: string
 }>()
 
 defineEmits<{
   (e: "logout"): void
 }>()
+
+const locationLabel = computed(() =>
+  props.location?.trim() ? props.location : "—"
+)
 </script>
 
 <template>
@@ -15,7 +21,7 @@ defineEmits<{
     </div>
 
     <div class="panel center">
-      {{ location || "—" }}
+      {{ locationLabel }}
     </div>
 
     <div class="panel right">

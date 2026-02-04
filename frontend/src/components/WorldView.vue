@@ -37,9 +37,17 @@ const WORLD_LOCATIONS = [
     x: 0.12,
     y: 0.40,
     discoveredFlag: "beach_discovered",
-    connections: ["forest"]
+    connections: ["shipwreck", "forest"]
   },
-
+  {
+    id: "shipwreck",
+    name: "Wrak statku",
+    icon: "/map/locations/shipwreck.png",
+    x: 0.10,
+    y: 0.46,
+    discoveredFlag: "shipwreck_discovered",
+    connections: ["beach"]
+  },
   {
     id: "forest",
     name: "Las",
@@ -47,37 +55,34 @@ const WORLD_LOCATIONS = [
     x: 0.20,
     y: 0.38,
     discoveredFlag: "forest_discovered",
-    connections: ["beach", "cave", "clearing_house"]
+    connections: ["beach", "abandoned_camp"]
   },
-
+  {
+    id: "abandoned_camp",
+    name: "Opuszczony obóz",
+    icon: "/map/locations/abandonedcamp.png",
+    x: 0.26,
+    y: 0.36,
+    discoveredFlag: "camp_discovered",
+    connections: ["forest", "cave", "village"]
+  },
   {
     id: "cave",
     name: "Jaskinia",
     icon: "/map/locations/cave.png",
-    x: 0.28,
-    y: 0.30,
+    x: 0.30,
+    y: 0.28,
     discoveredFlag: "cave_discovered",
-    connections: ["forest"]
+    connections: ["abandoned_camp"]
   },
-
-  {
-    id: "clearing_house",
-    name: "Dom na polanie",
-    icon: "/map/locations/clearinghouse.png",
-    x: 0.27,
-    y: 0.40,
-    discoveredFlag: "clearing_house_discovered",
-    connections: ["forest", "village"]
-  },
-
   {
     id: "village",
-    name: "Wioska",
+    name: "Osada",
     icon: "/map/locations/village.png",
-    x: 0.32,
-    y: 0.54,
-    discoveredFlag: "village_discovered",
-    connections: ["clearing_house"]
+    x: 0.34,
+    y: 0.52,
+    discoveredFlag: "settlement_discovered",
+    connections: ["abandoned_camp"]
   }
 ]
 
@@ -118,10 +123,14 @@ function getPoint(e: MouseEvent | TouchEvent) {
 }
 
 function enterLocation(locationId: string) {
+  if (props.location.id === locationId) {
+    openedLocationId.value = locationId
+    return
+  }
+
   emit("move", locationId)
   openedLocationId.value = locationId
 }
-
 
 function startDrag(e: MouseEvent | TouchEvent) {
   e.preventDefault()
@@ -156,15 +165,14 @@ async function handleAction(actionId: string) {
   const result = await Backend.doLocationAction(actionId)
   actionResult.value = result
 
-  if (result.discoveredLocations?.length) {
-    for (const loc of result.discoveredLocations) {
-      const flag = `${loc}_discovered`
-
-      if (!localFlags.value.includes(flag)) {
-        localFlags.value.push(flag)
-      }
+  result.discoveredLocations?.forEach(loc => {
+    const flag = `${loc}_discovered`
+    if (!localFlags.value.includes(flag)) {
+      localFlags.value.push(flag)
     }
-  }
+  })
+
+  emit("action", actionId)
 }
 
 const visibleConnections = computed(() => {

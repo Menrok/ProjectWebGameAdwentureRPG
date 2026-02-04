@@ -12,6 +12,7 @@ public class GameDbContext : DbContext
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<Quest> Quests => Set<Quest>();
     public DbSet<PlayerQuest> PlayerQuests => Set<PlayerQuest>();
+    public DbSet<PlayerQuestEntry> PlayerQuestEntries => Set<PlayerQuestEntry>();
 
     public GameDbContext(DbContextOptions<GameDbContext> options)
         : base(options)
@@ -50,6 +51,22 @@ public class GameDbContext : DbContext
             .HasOne(pq => pq.Quest)
             .WithMany()
             .HasForeignKey(pq => pq.QuestId);
+
+        modelBuilder.Entity<PlayerQuestEntry>()
+            .HasOne(e => e.Player)
+            .WithMany()
+            .HasForeignKey(e => e.PlayerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PlayerQuestEntry>()
+            .HasOne(e => e.Quest)
+            .WithMany()
+            .HasForeignKey(e => e.QuestId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PlayerQuestEntry>()
+            .HasIndex(e => new { e.PlayerId, e.QuestId, e.Stage })
+            .IsUnique();
 
         modelBuilder.Entity<PlayerFlag>()
             .HasOne(pf => pf.Player)

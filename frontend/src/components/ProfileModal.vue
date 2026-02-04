@@ -1,67 +1,39 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { Backend } from "@/backend"
+import type { PlayerStatusDto } from "@/backend/BackendClient"
 import TooltipItem from "@/components/TooltipItem.vue"
-import type { PlayerStatusDto } from "@/types/player"
 
 defineEmits<{ (e: "close"): void }>()
 
-const loading = ref(true)
 const player = ref<PlayerStatusDto | null>(null)
-const activeSlot = ref<"weapon" | "clothing" | null>(null)
+const activeSlot = ref<"Weapon" | "Boots" | "Pants" | "Jacket" | null>(null)
 
-const healthPercent = computed(() =>
-  player.value ? Math.min(100, (player.value.health / player.value.maxHealth) * 100) : 0
-)
+const healthPercent = computed(() => player.value ? Math.min(100, (player.value.health / player.value.maxHealth) * 100) : 0)
 
-async function loadPlayer() {
-  loading.value = true
-  try {
-    player.value = await Backend.getPlayerStatus()
-  } finally {
-    loading.value = false
-  }
-}
+const equippedMap = computed(() => {
+  const map = new Map<string, any>()
+  player.value?.equippedItems.forEach(item => {
+    map.set(item.slot, item)
+  })
+  return map
+})
 
-function toggleSlot(slot: "weapon" | "clothing") {
+function toggleSlot(slot: any) {
   activeSlot.value = activeSlot.value === slot ? null : slot
 }
 
-async function unequip(slot: "weapon" | "clothing") {
-  if (!player.value) return
+async function unequip(slot: any) {
+  const item = equippedMap.value.get(slot)
+  if (!item) return
 
-  if (slot === "weapon") {
-    await Backend.unequipWeapon()
-    player.value.weapon = null
-  } else {
-    await Backend.unequipClothing()
-    player.value.clothing = null
-  }
-
-  activeSlot.value = null
-
-  Backend.getPlayerStatus().then(p => {
-    player.value = p
-  })
+  await Backend.unequipItem(item.inventoryItemId)
+  await loadPlayer()
 }
 
-const weaponItem = computed(() =>
-  player.value?.weapon ? {
-        id: -1,
-        name: "Broń",
-        description: "Aktualnie założona broń",
-        itemType: "Weapon" as const
-      } : null
-)
-
-const clothingItem = computed(() =>
-  player.value?.clothing ? {
-        id: -2,
-        name: "Ubranie",
-        description: "Aktualnie założone ubranie",
-        itemType: "Clothing" as const
-      } : null
-)
+async function loadPlayer() {
+  player.value = await Backend.getPlayerStatus()
+}
 
 onMounted(loadPlayer)
 </script>
@@ -71,11 +43,9 @@ onMounted(loadPlayer)
     <div class="modal" @click.stop>
       <h2>Profil</h2>
 
-      <div v-if="loading">
-        Ładowanie profilu...
-      </div>
+      <div v-if="!player"></div>
 
-      <div v-else-if="player" class="content">
+      <div v-else class="content">
         <div class="left">
           <div class="name">
             {{ player.name }}
@@ -86,48 +56,54 @@ onMounted(loadPlayer)
               HP: {{ player.health }} / {{ player.maxHealth }}
             </div>
             <div class="hp-bar">
-              <div class="hp-fill" :style="{ width: healthPercent + '%' }"/>
+              <div class="hp-fill" :style="{ width: healthPercent + '%' }" />
             </div>
           </div>
 
           <div class="stats">
             <div class="stat">
               <span>Atak</span>
-              <strong>{{ player.attack }}</strong>
+              <strong>{{ player.minAttack }} – {{ player.maxAttack }}</strong>
             </div>
             <div class="stat">
               <span>Obrona</span>
               <strong>{{ player.defense }}</strong>
             </div>
+            <div class="stat">
+              <span>Kryształy</span>
+              <strong>{{ player.crystals }}</strong>
+            </div>
           </div>
         </div>
 
         <div class="right">
-          <div class="equipment-grid">
-            <div class="slot" :class="{ empty: !player.weapon }" @click="player.weapon && toggleSlot('weapon')">
-              <img v-if="player.weapon" :src="player.weapon" class="icon"/>
+          <div class="equipment-layout">
+            <div class="slot weapon" :class="{ empty: !equippedMap.get('Weapon') }" @click="equippedMap.get('Weapon') && toggleSlot('Weapon')">
+              <img v-if="equippedMap.get('Weapon')" :src="equippedMap.get('Weapon').icon" class="icon"/>
               <span v-else class="slot-label">Broń</span>
-
-              <TooltipItem v-if="activeSlot === 'weapon' && weaponItem" :item="weaponItem" :isEquipped="true" @unequip="unequip('weapon')"/>
+              <TooltipItem v-if="activeSlot === 'Weapon' && equippedMap.get('Weapon')" :item="equippedMap.get('Weapon')" :isEquipped="true" @unequip="unequip('Weapon')"/>
             </div>
 
-            <div class="slot" :class="{ empty: !player.clothing }" @click="player.clothing && toggleSlot('clothing')">
-              <img v-if="player.clothing" :src="player.clothing" class="icon"/>
-              <span v-else class="slot-label">Ubranie</span>
-
-              <TooltipItem v-if="activeSlot === 'clothing' && clothingItem" :item="clothingItem" :isEquipped="true" @unequip="unequip('clothing')"/>
+            <div class="slot pants" :class="{ empty: !equippedMap.get('Pants') }" @click="equippedMap.get('Pants') && toggleSlot('Pants')" >
+              <img v-if="equippedMap.get('Pants')" :src="equippedMap.get('Pants').icon" class="icon"/>
+              <span v-else class="slot-label">Spodnie</span>
+              <TooltipItem v-if="activeSlot === 'Pants' && equippedMap.get('Pants')" :item="equippedMap.get('Pants')" :isEquipped="true" @unequip="unequip('Pants')"/>
             </div>
 
-            <div class="slot empty">
-              <span class="slot-label">???</span>
+            <div class="slot jacket" :class="{ empty: !equippedMap.get('Jacket') }" @click="equippedMap.get('Jacket') && toggleSlot('Jacket')">
+              <img v-if="equippedMap.get('Jacket')" :src="equippedMap.get('Jacket').icon" class="icon"/>
+              <span v-else class="slot-label">Bluza</span>
+              <TooltipItem v-if="activeSlot === 'Jacket' && equippedMap.get('Jacket')" :item="equippedMap.get('Jacket')" :isEquipped="true" @unequip="unequip('Jacket')"/>
+            </div>
+
+            <div class="slot boots" :class="{ empty: !equippedMap.get('Boots') }" @click="equippedMap.get('Boots') && toggleSlot('Boots')">
+              <img v-if="equippedMap.get('Boots')" :src="equippedMap.get('Boots').icon" class="icon"/>
+              <span v-else class="slot-label">Buty</span>
+              <TooltipItem v-if="activeSlot === 'Boots' && equippedMap.get('Boots')" :item="equippedMap.get('Boots')" :isEquipped="true" @unequip="unequip('Boots')"/>
             </div>
           </div>
         </div>
       </div>
-
-      <button class="close" @click="$emit('close')">
-        Zamknij
-      </button>
     </div>
   </div>
 </template>
@@ -311,5 +287,33 @@ button {
 
 button:hover {
   background: rgba(30, 36, 42, 0.9);
+}
+
+.equipment-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  grid-template-rows: repeat(2, 72px);
+  gap: 12px;
+  justify-content: center;
+}
+
+.slot.weapon {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.slot.pants {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.slot.jacket {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.slot.boots {
+  grid-column: 2;
+  grid-row: 3;
 }
 </style>

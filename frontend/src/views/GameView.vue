@@ -11,15 +11,10 @@ import JournalModal from "@/components/JournalModal.vue"
 import IntroView from "@/components/IntroView.vue"
 
 const router = useRouter()
-
 const initialLoading = ref(true)
-
 const mode = ref<"Story" | "World" | null>(null)
 const locationName = ref("")
-const showInventory = ref(false)
-const showProfile = ref(false)
-const showJournal = ref(false)
-
+const activeModal = ref<"inventory" | "profile" | "journal" | null>(null)
 const location = ref<any>(null)
 const actions = ref<any[]>([])
 const connectedLocations = ref<any[]>([])
@@ -34,7 +29,7 @@ async function fetchGameState() {
       location.value = state.location ?? null
       actions.value = state.actions ?? []
       connectedLocations.value = state.connectedLocations ?? []
-      flags.value = state.flags ?? []
+      flags.value = state.flags?.map(f => f.flag) ?? []
       locationName.value = state.location?.name ?? ""
     } else {
       location.value = null
@@ -63,28 +58,14 @@ function logout() {
   router.push("/")
 }
 
-function openInventory() {
-  showInventory.value = true
+function openModal(name: "inventory" | "profile" | "journal") {
+  activeModal.value = name
 }
 
-function closeInventory() {
-  showInventory.value = false
+function closeModal() {
+  activeModal.value = null
 }
 
-function openProfile() {
-  showProfile.value = true
-}
-
-function closeProfile() {
-  showProfile.value = false
-}
-function openJournal() {
-  showJournal.value = true
-}
-
-function closeJournal() {
-  showJournal.value = false
-}
 
 async function moveTo(locationId: string) {
   await Backend.moveToLocation(locationId)
@@ -98,20 +79,18 @@ onMounted(initGame)
   <div class="game-layout">
     <TopBar v-if="mode === 'World'" :location="locationName" @logout="logout"/>
     <main class="game-content">
-      <div v-if="initialLoading">        
-        Ładowanie gry...
-      </div>
+      <div v-if="initialLoading"></div>
 
       <Transition name="fade-slide" mode="out-in">
         <IntroView v-if="mode === 'Story'" @finished="onIntroFinished"/>
-        <WorldView v-else-if="mode === 'World' && location" :location="location" :actions="actions" :connectedLocations="connectedLocations" :flags="flags" @move="moveTo" @refresh="fetchGameState"/>
+        <WorldView v-else-if="mode === 'World' && location" :location="location" :actions="actions" :connectedLocations="connectedLocations" :flags="flags" @move="moveTo" @refresh="fetchGameState" @action="fetchGameState"/>
       </Transition>
     </main>
 
-    <BottomBar v-if="mode === 'World'" @open-inventory="openInventory" @open-profile="openProfile" @open-journal="openJournal"/>
-      <InventoryModal v-if="showInventory" @close="closeInventory"/>
-      <ProfileModal v-if="showProfile" @close="closeProfile"/>
-      <JournalModal v-if="showJournal" @close="closeJournal"/>
+    <BottomBar v-if="mode === 'World'" @open-inventory="openModal('inventory')" @open-profile="openModal('profile')" @open-journal="openModal('journal')"/>
+      <InventoryModal v-if="activeModal === 'inventory'" @close="closeModal"/>
+      <ProfileModal v-if="activeModal === 'profile'" @close="closeModal"/>
+      <JournalModal v-if="activeModal === 'journal'" @close="closeModal"/>
   </div>
 </template>
 

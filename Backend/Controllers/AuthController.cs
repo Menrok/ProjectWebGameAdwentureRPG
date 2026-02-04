@@ -19,11 +19,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest("Niepoprawne dane rejestracji");
+            return BadRequest(new { message = "Niepoprawne dane rejestracji" });
 
         var success = await _auth.Register(request.Username, request.Password);
         if (!success)
-            return BadRequest("Użytkownik już istnieje");
+            return BadRequest(new { message = "Użytkownik już istnieje" });
 
         return Ok(new { message = "Zarejestrowano" });
     }
@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest(new { message = "Niepoprawne dane logowania" });
 
         var user = await _auth.Login(request.Username, request.Password);
         if (user == null)

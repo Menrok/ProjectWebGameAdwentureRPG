@@ -1,47 +1,73 @@
-using Backend.GameWorld.Quests;
 using Backend.Models.Game;
+using Backend.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
 public class QuestService
 {
+    private readonly GameDbContext _db;
+
+    public QuestService(GameDbContext db)
+    {
+        _db = db;
+    }
+
     public void EnsureQuest(Player player, string questId)
     {
-        if (player.Quests.Any(q => q.QuestId == questId))
+        var exists = _db.PlayerQuests
+            .Any(pq => pq.PlayerId == player.Id && pq.QuestId == questId);
+
+        if (exists)
             return;
 
-        var quest = new Quest
-        {
-            Id = questId,
-            Title = QuestTitles.GetTitle(questId)
-        };
+        var quest = _db.Quests
+            .AsNoTracking()
+            .FirstOrDefault(q => q.Id == questId);
+
+        if (quest == null)
+            throw new InvalidOperationException(
+                $"Quest definition '{questId}' not found. Did you forget to seed it?"
+            );
 
         var playerQuest = new PlayerQuest
         {
-            QuestId = quest.Id,
-            Quest = quest,
-            Stage = 0,
-            Description = QuestDescriptions.GetInitialDescription(questId),
-            Status = QuestStatus.Active
+            PlayerId = player.Id,
+            QuestId = questId,
+            CurrentStage = 0,
+            Status = QuestStatus.Active,
+            Entries = new List<PlayerQuestEntry>()
         };
 
-        player.Quests.Add(playerQuest);
+        _db.PlayerQuests.Add(playerQuest);
     }
 
     public void AdvanceQuest(
         Player player,
         string questId,
         int newStage,
-        Func<int, (int stage, string description)> resolver)
+        Func<int, string> textResolver)
     {
-        var pq = player.Quests.First(q => q.QuestId == questId);
+        EnsureQuest(player, questId);
 
-        if (newStage <= pq.Stage)
+        var quest = player.Quests.FirstOrDefault(q => q.QuestId == questId);
+
+        if (quest == null)
+        {
+            return;
+        }
+
+        if (newStage <= quest.CurrentStage)
             return;
 
-        var (stage, description) = resolver(newStage);
+        quest.CurrentStage = newStage;
 
-        pq.Stage = stage;
-        pq.Description = description;
+        quest.Entries.Add(new PlayerQuestEntry
+        {
+            PlayerId = player.Id,
+            QuestId = questId,
+            Stage = newStage,
+            Text = textResolver(newStage)
+        });
     }
 }

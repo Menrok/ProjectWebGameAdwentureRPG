@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue"
 import type { ActionResultDto } from "@/backend/BackendClient"
 
 const props = defineProps<{
@@ -24,10 +25,17 @@ const emit = defineEmits<{
   (e: "close"): void
   (e: "back"): void
 }>()
+
+function onKey(e: KeyboardEvent) {
+  if (e.key === "Escape") emit("close")
+}
+
+onMounted(() => window.addEventListener("keydown", onKey))
+onUnmounted(() => window.removeEventListener("keydown", onKey))
 </script>
 
 <template>
-<div class="modal-overlay">
+<div class="modal-overlay" @click.self="$emit('close')">
   <div class="story-card">
       <template v-if="!actionResult">
         <h2 class="location-name">{{ location.name }}</h2>
@@ -96,7 +104,7 @@ const emit = defineEmits<{
 .story-card {
   width: 90vw;
   max-width: 720px;
-
+  min-height: 360px;
   padding: 32px 34px 30px;
 
   background: rgba(14, 17, 21, 0.92);

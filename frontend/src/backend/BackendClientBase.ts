@@ -20,6 +20,14 @@ export class BackendClientBase {
       }
     })
 
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem("token")
+
+      window.location.reload()
+
+      throw new Error("Sesja wygasła. Zaloguj się ponownie.")
+    }
+
     if (!response.ok) {
       let message = "Błąd serwera"
 

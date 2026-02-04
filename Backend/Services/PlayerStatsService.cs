@@ -1,6 +1,5 @@
 using Backend.Data;
 using Backend.DTOs.Game;
-using Backend.Models.Game;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -61,6 +60,7 @@ public class PlayerStatsService
                 .Where(i => i.Slot != null)
                 .Select(i => new EquippedItemDto
                 {
+                    InventoryItemId = i.Id,
                     Slot = i.Slot!.Value,
                     Name = i.Name,
                     Icon = i.Icon

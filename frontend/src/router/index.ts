@@ -17,10 +17,6 @@ router.beforeEach((to) => {
     return { name: "auth" }
   }
 
-  if (to.name === "auth" && token) {
-    return { name: "game" }
-  }
-
   return true
 })
 

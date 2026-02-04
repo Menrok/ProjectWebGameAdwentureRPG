@@ -158,3 +158,6 @@
 
 ### Interakcje i fabuła
 - Przerobiono i uporządkowano strukturę historii przygody gry.
+
+## v0.0.12
+- Poprawki frontendowe po refaktoryzacji backendu (v0.0.11).

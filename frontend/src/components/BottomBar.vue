@@ -26,7 +26,6 @@ defineEmits<{
   </footer>
 </template>
 
-
 <style scoped>
 .bottom-bar {
   position: fixed;
@@ -81,7 +80,6 @@ defineEmits<{
   transform: translateY(0) scale(0.95);
 }
 
-/* centralny przycisk – delikatnie ważniejszy */
 .icon-button.main {
   opacity: 1;
 }

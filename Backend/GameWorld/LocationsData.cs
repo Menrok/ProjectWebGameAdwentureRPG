@@ -15,8 +15,6 @@ public static class LocationsData
                 "Na piasku wciąż widać ślady niedawnego sztormu.\n" +
                 "Morze jest spokojne, ale niepokojąco ciche.",
             ConnectedLocationIds = { "shipwreck", "forest" },
-
-
         },
 
         ["shipwreck"] = new Location

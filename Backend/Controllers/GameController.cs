@@ -65,7 +65,10 @@ public class GameController : ControllerBase
                 l.Name
             }),
             actions,
-            flags = player.Flags
+            flags = player.Flags.Select(f => new
+            {
+                flag = f.Flag
+            })
         });
     }
 

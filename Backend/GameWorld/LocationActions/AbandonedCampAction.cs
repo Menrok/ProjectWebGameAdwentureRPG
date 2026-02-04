@@ -73,8 +73,6 @@ public class AbandonedCampAction
 
         player.AddFlag("camp_entered");
 
-        _questService.EnsureQuest(player, QuestIds.EscapeIsland);
-
         _questService.AdvanceQuest(
             player,
             QuestIds.EscapeIsland,
@@ -123,8 +121,6 @@ public class AbandonedCampAction
         player.AddFlag("camp_note_read");
         player.AddFlag("settlement_discovered");
         player.AddFlag("cave_discovered");
-
-        _questService.EnsureQuest(player, QuestIds.CaveMystery);
 
         _questService.AdvanceQuest(
             player,

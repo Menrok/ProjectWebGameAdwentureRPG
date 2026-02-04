@@ -56,9 +56,14 @@ export interface ActionResultDto {
 export interface QuestDto {
   id: string
   title: string
-  description: string
-  stage: number
+  currentStage: number
   status: QuestStatus
+  entries: QuestEntryDto[]
+}
+
+export interface QuestEntryDto {
+  stage: number
+  text: string
 }
 
 export interface TradeItemDto {
